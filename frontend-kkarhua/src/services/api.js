@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 const BASE_URL = "http://localhost:8080/api";
 
 // ======= AUTH =======
@@ -111,3 +112,27 @@ export const uploadProductImage = async (id, file) => {
   if (!res.ok) throw new Error("Error al subir imagen");
   return res.json();
 };
+=======
+// src/services/api.js
+import axios from 'axios';
+
+const API_BASE_URL = 'http://localhost:8080/api';
+
+const api = axios.create({
+  baseURL: API_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json'
+  }
+});
+
+// Interceptor para manejar respuestas
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    console.error('Error en la petición:', error);
+    return Promise.reject(error);
+  }
+);
+
+export default api;
+>>>>>>> origin/main
