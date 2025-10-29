@@ -1,0 +1,32 @@
+Para usar tienes que abrir XAMPP e iniciar apache y MySQL. Después abres MySQL y abres una base de datos en el puerto 3306 con el nombre basedatos.
+finalmente vuelves  a visual code y vasa  la pestaña de springboot para iniciar el backend.
+Testeado con swagger.
+
+Imágenes
+Subir imagen de producto (éxito)
+Obtener imagen (éxito)
+Eliminar imagen de producto (éxito)
+
+Productos
+Obtener producto por ID (éxito)
+Actualizar producto (éxito)
+Eliminar producto (éxito)
+Crear nuevo producto (éxito)
+
+Stock
+Reducir stock (éxito)
+Agregar stock (éxito)
+Actualizar stock (éxito)
+Consultar stock (éxito)
+
+Obtener usuario por ID (éxito)
+Actualizar usuario (éxito)
+Eliminar usuario (éxito)
+Obtener lista de usuarios (éxito)
+Crear nuevo usuario (éxito)
+
+NOTAS: 
+-En productos se deja null a menos que quieras usar un url de imagen.
+-Id y fecha de creación en crear producto se ponen solas, no las ingreses
+-Para editar el stock tiene que poner "cantidad": x
+-Al usar "Actualizar Stock" tiene que usar "stock": x
