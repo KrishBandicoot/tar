@@ -1,19 +1,18 @@
-<<<<<<< HEAD
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 
 // Pages públicas
 import Home from './pages/Home';
 import Login from './pages/Login';
-import Register from './pages/Register';
-import Productos from './pages/Productos';
-import DetalleProducto from './pages/DetalleProducto';
+import Register from './pages/register';
+import Productos from './pages/productos';
+import DetalleProducto from './pages/detalleProducto';
 import Blog from './pages/Blog';
 import Nosotros from './pages/Nosotros';
 import Contacto from './pages/Contacto';
 
 // Pages de administración
-import Dashboard from './pages/admin/Dashboard';
+import HomeAdmin from './pages/admin/HomeAdmin';
 import UsuariosAdmin from './pages/admin/UsuariosAdmin';
 import AgregarUsuario from './pages/admin/AgregarUsuario';
 import ModificarUsuario from './pages/admin/ModificarUsuario';
@@ -21,10 +20,46 @@ import ProductosAdmin from './pages/admin/ProductosAdmin';
 import AgregarProducto from './pages/admin/AgregarProducto';
 import ModificarProducto from './pages/admin/ModificarProducto';
 
-// Componente para rutas protegidas
+// Componente para rutas protegidas de administrador
+function AdminRoute({ children }) {
+  const { isAuthenticated, isAdmin, loading } = useAuth();
+  
+  if (loading) {
+    return (
+      <div className="min-vh-100 d-flex align-items-center justify-content-center">
+        <div className="spinner-border text-primary" role="status">
+          <span className="visually-hidden">Cargando...</span>
+        </div>
+      </div>
+    );
+  }
+  
+  if (!isAuthenticated()) {
+    return <Navigate to="/login" replace />;
+  }
+  
+  if (!isAdmin()) {
+    return <Navigate to="/" replace />;
+  }
+  
+  return children;
+}
+
+// Componente para rutas protegidas (cualquier usuario autenticado)
 function ProtectedRoute({ children }) {
-  const { isAuthenticated } = useAuth();
-  return isAuthenticated() ? children : <Navigate to="/login" />;
+  const { isAuthenticated, loading } = useAuth();
+  
+  if (loading) {
+    return (
+      <div className="min-vh-100 d-flex align-items-center justify-content-center">
+        <div className="spinner-border text-primary" role="status">
+          <span className="visually-hidden">Cargando...</span>
+        </div>
+      </div>
+    );
+  }
+  
+  return isAuthenticated() ? children : <Navigate to="/login" replace />;
 }
 
 function App() {
@@ -44,81 +79,52 @@ function App() {
 
           {/* Rutas protegidas de administración */}
           <Route path="/admin/dashboard" element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
+            <AdminRoute>
+              <HomeAdmin />
+            </AdminRoute>
           } />
+          
           <Route path="/admin/usuarios" element={
-            <ProtectedRoute>
+            <AdminRoute>
               <UsuariosAdmin />
-            </ProtectedRoute>
+            </AdminRoute>
           } />
+          
           <Route path="/admin/usuarios/agregar" element={
-            <ProtectedRoute>
+            <AdminRoute>
               <AgregarUsuario />
-            </ProtectedRoute>
+            </AdminRoute>
           } />
+          
           <Route path="/admin/usuarios/modificar/:id" element={
-            <ProtectedRoute>
+            <AdminRoute>
               <ModificarUsuario />
-            </ProtectedRoute>
+            </AdminRoute>
           } />
+          
           <Route path="/admin/productos" element={
-            <ProtectedRoute>
+            <AdminRoute>
               <ProductosAdmin />
-            </ProtectedRoute>
+            </AdminRoute>
           } />
+          
           <Route path="/admin/productos/agregar" element={
-            <ProtectedRoute>
+            <AdminRoute>
               <AgregarProducto />
-            </ProtectedRoute>
+            </AdminRoute>
           } />
+          
           <Route path="/admin/productos/modificar/:id" element={
-            <ProtectedRoute>
+            <AdminRoute>
               <ModificarProducto />
-            </ProtectedRoute>
+            </AdminRoute>
           } />
 
           {/* Ruta por defecto */}
-          <Route path="*" element={<Navigate to="/" />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </AuthProvider>
     </BrowserRouter>
-=======
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-
-import Login from './pages/Login';
-import Dashboard from './pages/Dashboard';
-import ProductsPage from './pages/ProductsPage';
-import UsersPage from './pages/UsersPage';
-
-import CreateProduct from './components/products/CreateProduct';
-import EditProduct from './components/products/EditProduct';
-
-import CreateUser from './components/users/CreateUser';
-import EditUser from './components/users/EditUser';
-
-function App() {
-  return (
-    <Router>
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        
-        <Route path="/dashboard" element={<Dashboard />} />
-        
-        <Route path="/productos" element={<ProductsPage />} />
-        <Route path="/productos/crear" element={<CreateProduct />} />
-        <Route path="/productos/editar/:id" element={<EditProduct />} />
-        <Route path="/usuarios" element={<UsersPage />} />
-        <Route path="/usuarios/crear" element={<CreateUser />} />
-        <Route path="/usuarios/editar/:id" element={<EditUser />} />
-        
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
-        <Route path="*" element={<Navigate to="/dashboard" replace />} />
-      </Routes>
-    </Router>
->>>>>>> origin/main
   );
 }
 

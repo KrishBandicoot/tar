@@ -9,12 +9,13 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Verificar si hay un usuario guardado en localStorage
-    const savedUser = localStorage.getItem('user');
-    if (savedUser) {
+    // Verificar si hay usuario en localStorage al cargar
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
       try {
-        setUser(JSON.parse(savedUser));
+        setUser(JSON.parse(storedUser));
       } catch (error) {
+        console.error('Error al parsear usuario:', error);
         localStorage.removeItem('user');
       }
     }
@@ -23,12 +24,19 @@ export function AuthProvider({ children }) {
 
   const login = async (email, password) => {
     try {
-      const response = await apiLogin({ email, password });
-      setUser(response);
-      localStorage.setItem('user', JSON.stringify(response));
-      return { success: true, user: response };
+      const userData = await apiLogin({ email, password });
+      
+      // Guardar usuario en estado y localStorage
+      setUser(userData);
+      localStorage.setItem('user', JSON.stringify(userData));
+      
+      return { success: true, user: userData };
     } catch (error) {
-      return { success: false, error: error.message };
+      console.error('Error en login:', error);
+      return { 
+        success: false, 
+        error: error.message || 'Error al iniciar sesión' 
+      };
     }
   };
 
@@ -42,7 +50,7 @@ export function AuthProvider({ children }) {
   };
 
   const isAdmin = () => {
-    return user && user.rol === 'super-admin';
+    return user?.rol === 'super-admin';
   };
 
   const value = {
@@ -56,7 +64,7 @@ export function AuthProvider({ children }) {
 
   return (
     <AuthContext.Provider value={value}>
-      {!loading && children}
+      {children}
     </AuthContext.Provider>
   );
 }
@@ -64,7 +72,7 @@ export function AuthProvider({ children }) {
 export function useAuth() {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth debe ser usado dentro de un AuthProvider');
+    throw new Error('useAuth debe ser usado dentro de AuthProvider');
   }
   return context;
 }

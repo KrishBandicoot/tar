@@ -1,26 +1,16 @@
-<<<<<<< HEAD
 // src/pages/Login.jsx
 import { useState } from 'react';
-import { useAuth } from '../context/AuthContext';
-import { Navbar } from '../components/Navbar';
-import { Footer } from '../components/Footer';
-
-export function Login() {
-  const { login } = useAuth();
-=======
-import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { loginUser, isAuthenticated } from '../services/authService';
+import { useAuth } from '../context/AuthContext';
 
-const Login = () => {
+export default function Login() {
   const navigate = useNavigate();
+  const { login } = useAuth();
   
->>>>>>> origin/main
   const [formData, setFormData] = useState({
     email: '',
     password: ''
   });
-<<<<<<< HEAD
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [generalError, setGeneralError] = useState('');
@@ -31,7 +21,6 @@ const Login = () => {
   };
 
   const validatePassword = (password) => {
-    // Mínimo 8 caracteres, una mayúscula, una minúscula, un número
     const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}$/;
     return passwordRegex.test(password);
   };
@@ -40,7 +29,6 @@ const Login = () => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
     
-    // Validación en tiempo real
     const newErrors = { ...errors };
     
     if (name === 'email') {
@@ -65,32 +53,11 @@ const Login = () => {
     
     setErrors(newErrors);
     setGeneralError('');
-=======
-  
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-
-  useEffect(() => {
-    if (isAuthenticated()) {
-      navigate('/dashboard');
-    }
-  }, [navigate]);
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-    setError('');
->>>>>>> origin/main
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-<<<<<<< HEAD
     
-    // Validar todos los campos antes de enviar
     const newErrors = {};
     
     if (!formData.email) {
@@ -107,17 +74,10 @@ const Login = () => {
     
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
-=======
-    setError('');
-    
-    if (!formData.email || !formData.password) {
-      setError('Por favor complete todos los campos');
->>>>>>> origin/main
       return;
     }
     
     setLoading(true);
-<<<<<<< HEAD
     setGeneralError('');
     
     try {
@@ -126,35 +86,23 @@ const Login = () => {
       if (result.success) {
         // Redireccionar según el rol
         if (result.user.rol === 'super-admin') {
-          window.location.href = '/admin/dashboard';
+          navigate('/admin/dashboard');
         } else {
-          window.location.href = '/';
+          navigate('/');
         }
       } else {
         setGeneralError(result.error || 'Error al iniciar sesión');
       }
     } catch (error) {
       setGeneralError('Error de conexión. Verifica que el backend esté ejecutándose.');
-=======
-    
-    try {
-      await loginUser(formData.email, formData.password);
-      navigate('/dashboard');
-    } catch (err) {
-      setError('Credenciales incorrectas. Por favor intente nuevamente.');
-      console.error('Error en login:', err);
->>>>>>> origin/main
     } finally {
       setLoading(false);
     }
   };
 
   return (
-<<<<<<< HEAD
-    <>
-      <Navbar />
-      
-      <div className="container mt-5 mb-5">
+    <div className="min-vh-100 d-flex align-items-center justify-content-center bg-light">
+      <div className="container">
         <div className="row justify-content-center">
           <div className="col-md-5">
             <div className="card shadow">
@@ -181,96 +129,41 @@ const Login = () => {
                     <input
                       type="email"
                       className={`form-control ${errors.email ? 'is-invalid' : formData.email && !errors.email ? 'is-valid' : ''}`}
-=======
-    <div className="min-vh-100 d-flex align-items-center justify-content-center bg-light">
-      <div className="container">
-        <div className="row justify-content-center">
-          <div className="col-md-6 col-lg-4">
-            <div className="card shadow-lg">
-              <div className="card-body p-5">
-                <div className="text-center mb-4">
-                  <i className="bi bi-shop text-primary" style={{ fontSize: '3rem' }}></i>
-                  <h2 className="mt-3 mb-2 fw-bold">Tienda Virtual</h2>
-                  <p className="text-muted">Panel de Administración</p>
-                </div>
-                
-                <form onSubmit={handleSubmit}>
-                  {error && (
-                    <div className="alert alert-danger d-flex align-items-center" role="alert">
-                      <i className="bi bi-exclamation-triangle-fill me-2"></i>
-                      <div>{error}</div>
-                    </div>
-                  )}
-                  
-                  <div className="mb-3">
-                    <label htmlFor="email" className="form-label">
-                      <i className="bi bi-envelope me-1"></i>
-                      Email
-                    </label>
-                    <input
-                      type="email"
-                      className="form-control"
->>>>>>> origin/main
                       id="email"
                       name="email"
                       value={formData.email}
                       onChange={handleChange}
-<<<<<<< HEAD
                       placeholder="ejemplo@duoc.cl"
                       disabled={loading}
                     />
                     {errors.email && (
-                      <div className="invalid-feedback">
-                        {errors.email}
-                      </div>
+                      <div className="invalid-feedback">{errors.email}</div>
                     )}
                     {formData.email && !errors.email && (
-                      <div className="valid-feedback">
-                        Email válido
-                      </div>
+                      <div className="valid-feedback">Email válido</div>
                     )}
                   </div>
 
                   <div className="mb-3">
                     <label htmlFor="password" className="form-label">
                       <i className="bi bi-lock me-2"></i>
-=======
-                      placeholder="correo@ejemplo.com"
-                      required
-                      disabled={loading}
-                    />
-                  </div>
-                  
-                  <div className="mb-4">
-                    <label htmlFor="password" className="form-label">
-                      <i className="bi bi-lock me-1"></i>
->>>>>>> origin/main
                       Contraseña
                     </label>
                     <input
                       type="password"
-<<<<<<< HEAD
                       className={`form-control ${errors.password ? 'is-invalid' : formData.password && !errors.password ? 'is-valid' : ''}`}
-=======
-                      className="form-control"
->>>>>>> origin/main
                       id="password"
                       name="password"
                       value={formData.password}
                       onChange={handleChange}
                       placeholder="••••••••"
-<<<<<<< HEAD
                       disabled={loading}
                     />
                     {errors.password && (
-                      <div className="invalid-feedback">
-                        {errors.password}
-                      </div>
+                      <div className="invalid-feedback">{errors.password}</div>
                     )}
                     {formData.password && !errors.password && (
-                      <div className="valid-feedback">
-                        Contraseña válida
-                      </div>
+                      <div className="valid-feedback">Contraseña válida</div>
                     )}
                     <small className="text-muted">
                       Mínimo 8 caracteres, una mayúscula, una minúscula y un número
@@ -281,21 +174,10 @@ const Login = () => {
                     type="submit" 
                     className="btn btn-primary w-100 mb-3"
                     disabled={loading || Object.keys(errors).length > 0}
-=======
-                      required
-                      disabled={loading}
-                    />
-                  </div>
-                  
-                  <button
-                    type="submit"
-                    className="btn btn-primary w-100 py-2"
-                    disabled={loading}
->>>>>>> origin/main
                   >
                     {loading ? (
                       <>
-                        <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                        <span className="spinner-border spinner-border-sm me-2"></span>
                         Iniciando sesión...
                       </>
                     ) : (
@@ -306,7 +188,6 @@ const Login = () => {
                     )}
                   </button>
                 </form>
-<<<<<<< HEAD
 
                 <div className="text-center">
                   <p className="text-muted mb-0">
@@ -324,27 +205,10 @@ const Login = () => {
                 <i className="bi bi-shield-check me-1"></i>
                 Tus datos están protegidos
               </small>
-=======
-              </div>
-            </div>
-            
-            <div className="text-center mt-3">
-              <small className="text-muted">© 2025 Tienda Virtual. Todos los derechos reservados.</small>
->>>>>>> origin/main
             </div>
           </div>
         </div>
       </div>
-<<<<<<< HEAD
-      
-      <Footer />
-    </>
-  );
-}
-=======
     </div>
   );
-};
-
-export default Login;
->>>>>>> origin/main
+}

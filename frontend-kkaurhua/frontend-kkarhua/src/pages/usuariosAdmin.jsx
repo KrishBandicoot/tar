@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { AdminSidebar } from '../../components/AdminSidebar';
 import { getUsers, deleteUser, updateUser } from '../../services/api';
 
-export function UsuariosAdmin() {
+export default function UsuariosAdmin() {
   const [usuarios, setUsuarios] = useState([]);
   const [filteredUsuarios, setFilteredUsuarios] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -36,7 +37,6 @@ export function UsuariosAdmin() {
   const filtrarUsuarios = () => {
     let resultado = [...usuarios];
 
-    // Filtro por búsqueda
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
       resultado = resultado.filter(u => 
@@ -45,7 +45,6 @@ export function UsuariosAdmin() {
       );
     }
 
-    // Filtro por rol
     if (filterRol !== 'todos') {
       resultado = resultado.filter(u => u.rol === filterRol);
     }
@@ -88,10 +87,10 @@ export function UsuariosAdmin() {
         <div className="col-md-10 main-content p-4">
           <div className="d-flex justify-content-between align-items-center mb-4">
             <h1>Gestión de Usuarios</h1>
-            <a href="/admin/usuarios/agregar" className="btn btn-primary">
+            <Link to="/admin/usuarios/agregar" className="btn btn-primary">
               <i className="bi bi-plus-circle me-2"></i>
               Nuevo Usuario
-            </a>
+            </Link>
           </div>
 
           {error && (
@@ -108,7 +107,7 @@ export function UsuariosAdmin() {
             </div>
           )}
 
-          {/* Filtros y búsqueda */}
+          {/* Filtros */}
           <div className="card mb-4">
             <div className="card-body">
               <div className="row g-3">
@@ -209,13 +208,13 @@ export function UsuariosAdmin() {
                             <td>{new Date(usuario.fechaCreacion).toLocaleDateString()}</td>
                             <td>
                               <div className="btn-group btn-group-sm" role="group">
-                                <a 
-                                  href={`/admin/usuarios/modificar/${usuario.id}`}
+                                <Link 
+                                  to={`/admin/usuarios/modificar/${usuario.id}`}
                                   className="btn btn-outline-primary"
                                   title="Editar"
                                 >
                                   <i className="bi bi-pencil"></i>
-                                </a>
+                                </Link>
                                 <button 
                                   className="btn btn-outline-warning"
                                   onClick={() => handleCambiarEstado(usuario)}
