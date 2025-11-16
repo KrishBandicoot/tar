@@ -1,0 +1,252 @@
+.detalle-producto-container {
+  min-height: 100vh;
+  background-color: #f8f9fa;
+  padding: 40px 0;
+}
+
+.breadcrumb-nav {
+  padding: 20px 0;
+  font-size: 14px;
+  color: #6c757d;
+}
+
+.breadcrumb-nav a {
+  color: #0d6efd;
+  text-decoration: none;
+}
+
+.breadcrumb-nav a:hover {
+  text-decoration: underline;
+}
+
+.breadcrumb-nav span {
+  margin: 0 8px;
+}
+
+.producto-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  margin-bottom: 60px;
+}
+
+.producto-imagenes {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.imagen-principal {
+  width: 100%;
+  height: 400px;
+  background: #e9ecef;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+
+.imagen-principal img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.imagen-placeholder {
+  font-size: 48px;
+  color: #adb5bd;
+}
+
+.miniaturas {
+  display: flex;
+  gap: 10px;
+}
+
+.miniatura {
+  width: 80px;
+  height: 80px;
+  background: #e9ecef;
+  border: 2px solid #dee2e6;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: border-color 0.3s;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.miniatura:hover,
+.miniatura.active {
+  border-color: #0d6efd;
+}
+
+.miniatura img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.producto-info {
+  background: white;
+  padding: 30px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.producto-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.producto-titulo {
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: #212529;
+  margin: 0;
+}
+
+.producto-precio {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #198754;
+  margin: 0;
+}
+
+.producto-descripcion {
+  color: #6c757d;
+  line-height: 1.7;
+  margin-bottom: 30px;
+  font-size: 15px;
+}
+
+.cantidad-section {
+  margin-bottom: 25px;
+}
+
+.cantidad-label {
+  display: block;
+  font-weight: 500;
+  color: #495057;
+  margin-bottom: 10px;
+  font-size: 15px;
+}
+
+.cantidad-input {
+  width: 120px;
+  padding: 10px 15px;
+  font-size: 16px;
+  border: 1px solid #dee2e6;
+  border-radius: 4px;
+  text-align: center;
+}
+
+.btn-agregar-carrito {
+  width: 100%;
+  padding: 15px;
+  font-size: 16px;
+  font-weight: 600;
+  color: white;
+  background-color: #0d6efd;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.btn-agregar-carrito:hover {
+  background-color: #0b5ed7;
+}
+
+.btn-agregar-carrito:active {
+  transform: translateY(1px);
+}
+
+.productos-relacionados {
+  margin-top: 60px;
+  padding-top: 40px;
+  border-top: 1px solid #dee2e6;
+}
+
+.productos-relacionados h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #212529;
+  margin-bottom: 30px;
+}
+
+.productos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 20px;
+}
+
+.producto-relacionado {
+  background: white;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: transform 0.3s, box-shadow 0.3s;
+  cursor: pointer;
+}
+
+.producto-relacionado:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.producto-relacionado-img {
+  width: 100%;
+  height: 180px;
+  background: #e9ecef;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+  color: #adb5bd;
+}
+
+.producto-relacionado-info {
+  padding: 15px;
+}
+
+.producto-relacionado-nombre {
+  font-size: 14px;
+  font-weight: 500;
+  color: #212529;
+  margin-bottom: 8px;
+}
+
+.producto-relacionado-precio {
+  font-size: 16px;
+  font-weight: 600;
+  color: #198754;
+}
+
+@media (max-width: 768px) {
+  .producto-content {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .producto-header {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .imagen-principal {
+    height: 300px;
+  }
+
+  .productos-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  }
+}
