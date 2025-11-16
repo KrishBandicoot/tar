@@ -21,7 +21,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
-
 @Tag(name = "Stock", description = "Gestión de inventario y stock de productos")
 @RestController
 @RequestMapping("api/stock")

@@ -26,7 +26,6 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 
-
 @Tag(name = "Usuarios", description = "Operaciones relacionadas con usuarios")
 @RestController
 @RequestMapping("api/usuarios")
