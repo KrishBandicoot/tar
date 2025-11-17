@@ -1,9 +1,13 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Navbar } from "../../componentes/Navbar/Navbar";
 import { Footer } from "../../componentes/Footer/Footer";
 import './Home.css';
 
+const API_BASE_URL = 'http://localhost:8080/api';
+
 export function Home() {
+    const navigate = useNavigate();
     const [productos, setProductos] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -15,14 +19,18 @@ export function Home() {
     const cargarProductos = async () => {
         try {
             setLoading(true);
-            const response = await fetch('http://localhost:8080/api/productos');
+            const response = await fetch(`${API_BASE_URL}/productos`);
             
             if (!response.ok) {
                 throw new Error('Error al conectar con el servidor');
             }
 
             const data = await response.json();
-            setProductos(data);
+            // Filtrar solo productos activos y limitar a 8
+            const productosActivos = data
+                .filter(p => p.estado === 'activo')
+                .slice(0, 8);
+            setProductos(productosActivos);
             setError(null);
         } catch (err) {
             console.error('Error al cargar productos:', err);
@@ -32,6 +40,27 @@ export function Home() {
         }
     };
 
+    const handleVerProducto = (id) => {
+        navigate(`/producto/${id}`);
+    };
+
+    const handleVerTodosProductos = () => {
+        navigate('/lista-productos');
+    };
+
+    // Función para obtener la URL completa de la imagen
+    const getImageUrl = (producto) => {
+        if (!producto.imagen) {
+            return 'https://via.placeholder.com/400x300?text=Sin+Imagen';
+        }
+        // Si la imagen ya es una URL completa, la retornamos tal cual
+        if (producto.imagen.startsWith('http')) {
+            return producto.imagen;
+        }
+        // Si no, construimos la URL usando el endpoint de imágenes
+        return `${API_BASE_URL}/imagenes/${producto.imagen}`;
+    };
+
     return (
         <>
             {/* Navbar sin contenedor para que ocupe todo el ancho */}
@@ -39,7 +68,7 @@ export function Home() {
 
             {/* Auth Links */}
             <div className="auth-links">
-                <a href="#">Iniciar Sesion</a> | <a href="#">Registrar</a>
+                <a href="IniciarSesion">Iniciar Sesion</a> | <a href="Registrar">Registrar</a>
             </div>
 
             {/* Hero Section */}
@@ -49,12 +78,8 @@ export function Home() {
                         <div className="hero-text">
                             <h1>TIENDA ONLINE</h1>
                             <p>
-                                Lorem ipsum dolor sit amet consectetur adipisicing elit. Blanditiis 
-                                mollitia dioribus nesciunt molestiae. Tenetur temporibus neque 
-                                natus sint dolores tempora laboriosam ea possimus cum mollita 
-                                nesciunt esse, modi molestiae illum!
+                                Bienvenido a Kkarhua, nuestra tienda online de joyería, donde encontrarás las piezas más exclusivas y elegantes para cada ocasión.
                             </p>
-                            <button className="btn btn-success">✓ Ver productos</button>
                         </div>
                         <div className="hero-image">
                             <img 
@@ -68,6 +93,16 @@ export function Home() {
 
             {/* Products Section */}
             <div className="container products-section">
+                <div className="d-flex justify-content-between align-items-center mb-4">
+                    <h2>Productos Destacados</h2>
+                    <button 
+                        className="btn btn-outline-primary"
+                        onClick={handleVerTodosProductos}
+                    >
+                        Ver todos los productos →
+                    </button>
+                </div>
+
                 {loading && (
                     <div className="text-center py-5">
                         <div className="spinner-border text-success" role="status">
@@ -98,16 +133,27 @@ export function Home() {
                                 <div className="card h-100 product-card">
                                     <div className="card-img-container">
                                         <img 
-                                            src={producto.imagen} 
+                                            src={getImageUrl(producto)} 
                                             className="card-img-top" 
                                             alt={producto.nombre}
+                                            onError={(e) => {
+                                                // Si la imagen falla al cargar, mostrar placeholder
+                                                e.target.src = 'https://via.placeholder.com/400x300?text=Sin+Imagen';
+                                            }}
                                         />
-                                        <span className="badge-price">${producto.precio}</span>
+                                        <span className="badge-price">${producto.precio?.toLocaleString('es-CL')}</span>
                                     </div>
                                     <div className="card-body d-flex flex-column">
                                         <h5 className="card-title">{producto.nombre}</h5>
-                                        <p className="card-text flex-grow-1">{producto.descripcion}</p>
-                                        <button className="btn btn-outline-primary w-100 mt-auto">
+                                        <p className="card-text flex-grow-1">
+                                            {producto.descripcion && producto.descripcion.length > 80 
+                                                ? producto.descripcion.substring(0, 80) + '...' 
+                                                : producto.descripcion}
+                                        </p>
+                                        <button 
+                                            className="btn btn-outline-primary w-100 mt-auto"
+                                            onClick={() => handleVerProducto(producto.id)}
+                                        >
                                             Ver Producto
                                         </button>
                                     </div>

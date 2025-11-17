@@ -47,9 +47,9 @@ export function DetalleProducto() {
       const response = await fetch(`${API_BASE_URL}/productos`);
       if (response.ok) {
         const data = await response.json();
-        // Filtrar el producto actual y tomar solo 5 productos
+        // Filtrar el producto actual y tomar solo 5 productos activos
         const relacionados = data
-          .filter(p => p.id !== parseInt(id) && p.activo)
+          .filter(p => p.id !== parseInt(id) && p.estado === 'activo')
           .slice(0, 5);
         setProductosRelacionados(relacionados);
       }
@@ -68,6 +68,17 @@ export function DetalleProducto() {
     if (valor > 0) {
       setCantidad(valor);
     }
+  };
+
+  // Función para obtener la URL completa de la imagen
+  const getImageUrl = (imagenNombre) => {
+    if (!imagenNombre) {
+      return null;
+    }
+    if (imagenNombre.startsWith('http')) {
+      return imagenNombre;
+    }
+    return `${API_BASE_URL}/imagenes/${imagenNombre}`;
   };
 
   if (loading) {
@@ -105,6 +116,8 @@ export function DetalleProducto() {
     );
   }
 
+  const imagenUrl = getImageUrl(producto.imagen);
+
   return (
     <>
       <Navbar />
@@ -115,7 +128,7 @@ export function DetalleProducto() {
           <nav className="breadcrumb-nav">
             <Link to="/">Home</Link>
             <span>›</span>
-            <Link to="/">Productos</Link>
+            <Link to="/lista-productos">Productos</Link>
             <span>›</span>
             <span>{producto.nombre}</span>
           </nav>
@@ -125,11 +138,22 @@ export function DetalleProducto() {
             {/* Sección de imágenes */}
             <div className="producto-imagenes">
               <div className="imagen-principal">
-                {producto.imagen ? (
-                  <img src={producto.imagen} alt={producto.nombre} />
-                ) : (
-                  <div className="imagen-placeholder">📷</div>
-                )}
+                {imagenUrl ? (
+                  <img 
+                    src={imagenUrl} 
+                    alt={producto.nombre}
+                    onError={(e) => {
+                      e.target.style.display = 'none';
+                      e.target.nextSibling.style.display = 'flex';
+                    }}
+                  />
+                ) : null}
+                <div 
+                  className="imagen-placeholder" 
+                  style={{ display: imagenUrl ? 'none' : 'flex' }}
+                >
+                  📷
+                </div>
               </div>
               
               <div className="miniaturas">
@@ -139,8 +163,14 @@ export function DetalleProducto() {
                     className={`miniatura ${imagenActual === index ? 'active' : ''}`}
                     onClick={() => setImagenActual(index)}
                   >
-                    {producto.imagen && index === 0 ? (
-                      <img src={producto.imagen} alt={`Vista ${index + 1}`} />
+                    {imagenUrl && index === 0 ? (
+                      <img 
+                        src={imagenUrl} 
+                        alt={`Vista ${index + 1}`}
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                        }}
+                      />
                     ) : (
                       <div style={{ fontSize: '24px', color: '#adb5bd' }}>📷</div>
                     )}
@@ -153,19 +183,28 @@ export function DetalleProducto() {
             <div className="producto-info">
               <div className="producto-header">
                 <h1 className="producto-titulo">{producto.nombre}</h1>
-                <p className="producto-precio">${producto.precio}</p>
+                <p className="producto-precio">${producto.precio?.toLocaleString('es-CL')}</p>
               </div>
 
               <p className="producto-descripcion">
                 {producto.descripcion || 
-                  'Las manzanas son una fruta deliciosa y versátil, apreciada en todo el mundo por su sabor refrescante y sus numerosos beneficios para la salud. Disponibles en una variedad de colores, desde el rojo brillante hasta el verde brillante y el amarillo dorado, las manzanas son perfectas para cualquier ocasión, ya sea como un refrigerio saludable.'}
+                  'Descripción del producto no disponible.'}
               </p>
+
+              <div className="producto-detalles">
+                <p><strong>Stock disponible:</strong> {producto.stock || 0} unidades</p>
+                <p><strong>Categoría:</strong> {producto.categoria || 'Sin categoría'}</p>
+                <p><strong>Estado:</strong> <span className={`badge ${producto.estado === 'activo' ? 'bg-success' : 'bg-secondary'}`}>
+                  {producto.estado || 'N/A'}
+                </span></p>
+              </div>
 
               <div className="cantidad-section">
                 <label className="cantidad-label">Cantidad</label>
                 <input
                   type="number"
                   min="1"
+                  max={producto.stock || 1}
                   value={cantidad}
                   onChange={handleCantidadChange}
                   className="cantidad-input"
@@ -175,8 +214,9 @@ export function DetalleProducto() {
               <button 
                 className="btn-agregar-carrito"
                 onClick={handleAgregarCarrito}
+                disabled={!producto.stock || producto.stock === 0}
               >
-                Añadir al carrito
+                {producto.stock > 0 ? 'Añadir al carrito' : 'Sin stock'}
               </button>
             </div>
           </div>
@@ -184,31 +224,42 @@ export function DetalleProducto() {
           {/* Productos relacionados */}
           {productosRelacionados.length > 0 && (
             <div className="productos-relacionados">
-              <h3>Related Products</h3>
+              <h3>Productos Relacionados</h3>
               <div className="productos-grid">
-                {productosRelacionados.map((prod) => (
-                  <div 
-                    key={prod.id}
-                    className="producto-relacionado"
-                    onClick={() => navigate(`/producto/${prod.id}`)}
-                  >
-                    <div className="producto-relacionado-img">
-                      {prod.imagen ? (
-                        <img src={prod.imagen} alt={prod.nombre} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                      ) : (
-                        '📷'
-                      )}
-                    </div>
-                    <div className="producto-relacionado-info">
-                      <div className="producto-relacionado-nombre">
-                        {prod.nombre}
+                {productosRelacionados.map((prod) => {
+                  const prodImagenUrl = getImageUrl(prod.imagen);
+                  return (
+                    <div 
+                      key={prod.id}
+                      className="producto-relacionado"
+                      onClick={() => navigate(`/producto/${prod.id}`)}
+                    >
+                      <div className="producto-relacionado-img">
+                        {prodImagenUrl ? (
+                          <img 
+                            src={prodImagenUrl} 
+                            alt={prod.nombre} 
+                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                            onError={(e) => {
+                              e.target.style.display = 'none';
+                              e.target.parentElement.innerHTML = '📷';
+                            }}
+                          />
+                        ) : (
+                          '📷'
+                        )}
                       </div>
-                      <div className="producto-relacionado-precio">
-                        ${prod.precio}
+                      <div className="producto-relacionado-info">
+                        <div className="producto-relacionado-nombre">
+                          {prod.nombre}
+                        </div>
+                        <div className="producto-relacionado-precio">
+                          ${prod.precio?.toLocaleString('es-CL')}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           )}
