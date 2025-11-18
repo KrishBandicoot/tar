@@ -32,6 +32,7 @@ export function DetalleProducto() {
       }
 
       const data = await response.json();
+      console.log('Producto cargado:', data); // Para debug
       setProducto(data);
       setError(null);
     } catch (err) {
@@ -79,6 +80,22 @@ export function DetalleProducto() {
       return imagenNombre;
     }
     return `${API_BASE_URL}/imagenes/${imagenNombre}`;
+  };
+
+  // ⭐ FUNCIÓN NUEVA: Obtener el nombre de la categoría
+  const getNombreCategoria = (categoria) => {
+    if (!categoria) {
+      return 'Sin categoría';
+    }
+    // Si es un objeto, extraer el nombre
+    if (typeof categoria === 'object' && categoria.nombre) {
+      return categoria.nombre;
+    }
+    // Si es un string, retornarlo directamente
+    if (typeof categoria === 'string') {
+      return categoria;
+    }
+    return 'Sin categoría';
   };
 
   if (loading) {
@@ -193,7 +210,8 @@ export function DetalleProducto() {
 
               <div className="producto-detalles">
                 <p><strong>Stock disponible:</strong> {producto.stock || 0} unidades</p>
-                <p><strong>Categoría:</strong> {producto.categoria || 'Sin categoría'}</p>
+                {/* ⭐ CORRECCIÓN AQUÍ */}
+                <p><strong>Categoría:</strong> {getNombreCategoria(producto.categoria)}</p>
                 <p><strong>Estado:</strong> <span className={`badge ${producto.estado === 'activo' ? 'bg-success' : 'bg-secondary'}`}>
                   {producto.estado || 'N/A'}
                 </span></p>
