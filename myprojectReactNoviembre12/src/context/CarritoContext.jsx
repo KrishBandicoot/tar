@@ -1,4 +1,3 @@
-// src/context/CarritoContext.jsx
 import { createContext, useContext, useState, useEffect } from 'react';
 
 const CarritoContext = createContext();
@@ -13,12 +12,10 @@ export function useCarrito() {
 
 export function CarritoProvider({ children }) {
   const [items, setItems] = useState(() => {
-    // Cargar carrito del localStorage al iniciar
     const carritoGuardado = localStorage.getItem('carrito');
     return carritoGuardado ? JSON.parse(carritoGuardado) : [];
   });
 
-  // Guardar en localStorage cada vez que cambie el carrito
   useEffect(() => {
     localStorage.setItem('carrito', JSON.stringify(items));
   }, [items]);
@@ -28,14 +25,31 @@ export function CarritoProvider({ children }) {
       const itemExistente = prevItems.find(item => item.id === producto.id);
       
       if (itemExistente) {
-        // Si ya existe, aumentar cantidad
+        // Verificar que no exceda el stock
+        const nuevaCantidad = itemExistente.cantidad + cantidad;
+        const stockDisponible = producto.stock || 0;
+        
+        if (nuevaCantidad > stockDisponible) {
+          alert(`Solo hay ${stockDisponible} unidades disponibles de ${producto.nombre}`);
+          return prevItems.map(item =>
+            item.id === producto.id
+              ? { ...item, cantidad: stockDisponible }
+              : item
+          );
+        }
+        
         return prevItems.map(item =>
           item.id === producto.id
-            ? { ...item, cantidad: item.cantidad + cantidad }
+            ? { ...item, cantidad: nuevaCantidad }
             : item
         );
       } else {
-        // Si no existe, agregar nuevo
+        // Verificar stock al agregar nuevo producto
+        const stockDisponible = producto.stock || 0;
+        if (cantidad > stockDisponible) {
+          alert(`Solo hay ${stockDisponible} unidades disponibles de ${producto.nombre}`);
+          return [...prevItems, { ...producto, cantidad: stockDisponible }];
+        }
         return [...prevItems, { ...producto, cantidad }];
       }
     });
@@ -52,11 +66,20 @@ export function CarritoProvider({ children }) {
     }
 
     setItems(prevItems =>
-      prevItems.map(item =>
-        item.id === productoId
-          ? { ...item, cantidad: nuevaCantidad }
-          : item
-      )
+      prevItems.map(item => {
+        if (item.id === productoId) {
+          const stockDisponible = item.stock || 0;
+          
+          // Validar que no exceda el stock
+          if (nuevaCantidad > stockDisponible) {
+            alert(`Solo hay ${stockDisponible} unidades disponibles de ${item.nombre}`);
+            return { ...item, cantidad: stockDisponible };
+          }
+          
+          return { ...item, cantidad: nuevaCantidad };
+        }
+        return item;
+      })
     );
   };
 

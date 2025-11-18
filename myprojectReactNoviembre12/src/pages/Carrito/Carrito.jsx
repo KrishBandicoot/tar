@@ -1,4 +1,3 @@
-// src/pages/Carrito/Carrito.jsx
 import { useNavigate } from 'react-router-dom';
 import { useCarrito } from '../../context/CarritoContext';
 import { Navbar } from '../../componentes/Navbar/Navbar';
@@ -17,15 +16,25 @@ export function Carrito() {
     return `${API_BASE_URL}/imagenes/${imagen}`;
   };
 
-  const handleCantidadChange = (id, nuevaCantidad) => {
+  const handleCantidadChange = (id, nuevaCantidad, stock) => {
     if (nuevaCantidad >= 1) {
-      actualizarCantidad(id, nuevaCantidad);
+      // Validar que no exceda el stock
+      if (nuevaCantidad > stock) {
+        alert(`Solo hay ${stock} unidades disponibles`);
+        actualizarCantidad(id, stock);
+      } else {
+        actualizarCantidad(id, nuevaCantidad);
+      }
     }
   };
 
   const handleProcederPago = () => {
     alert('Funcionalidad de pago en desarrollo');
-    // Aquí puedes agregar la lógica de checkout
+  };
+
+  // Función para navegar al detalle del producto
+  const handleVerDetalleProducto = (productoId) => {
+    navigate(`/producto/${productoId}`);
   };
 
   if (items.length === 0) {
@@ -67,7 +76,13 @@ export function Carrito() {
                 <div className="card-body">
                   {items.map((item) => (
                     <div key={item.id} className="carrito-item">
-                      <div className="item-imagen">
+                      {/* Imagen clickeable */}
+                      <div 
+                        className="item-imagen" 
+                        style={{ cursor: 'pointer' }}
+                        onClick={() => handleVerDetalleProducto(item.id)}
+                        title="Ver detalles del producto"
+                      >
                         <img 
                           src={getImageUrl(item.imagen)} 
                           alt={item.nombre}
@@ -77,19 +92,30 @@ export function Carrito() {
                         />
                       </div>
 
-                      <div className="item-info">
-                        <h5 className="item-nombre">{item.nombre}</h5>
+                      {/* Info del producto - también clickeable */}
+                      <div 
+                        className="item-info"
+                        style={{ cursor: 'pointer' }}
+                        onClick={() => handleVerDetalleProducto(item.id)}
+                      >
+                        <h5 className="item-nombre" style={{ color: '#0d6efd' }}>
+                          {item.nombre}
+                        </h5>
                         <p className="item-descripcion">
                           {item.descripcion && item.descripcion.length > 60
                             ? item.descripcion.substring(0, 60) + '...'
                             : item.descripcion}
                         </p>
+                        {/* Mostrar stock disponible */}
+                        <small className="text-muted">
+                          Stock disponible: {item.stock || 0} unidades
+                        </small>
                       </div>
 
                       <div className="item-cantidad">
                         <button 
                           className="btn-cantidad"
-                          onClick={() => handleCantidadChange(item.id, item.cantidad - 1)}
+                          onClick={() => handleCantidadChange(item.id, item.cantidad - 1, item.stock)}
                         >
                           <i className="bi bi-dash-circle"></i>
                         </button>
@@ -97,12 +123,14 @@ export function Carrito() {
                           type="number"
                           className="cantidad-input"
                           value={item.cantidad}
-                          onChange={(e) => handleCantidadChange(item.id, parseInt(e.target.value) || 1)}
+                          onChange={(e) => handleCantidadChange(item.id, parseInt(e.target.value) || 1, item.stock)}
                           min="1"
+                          max={item.stock || 1}
                         />
                         <button 
                           className="btn-cantidad"
-                          onClick={() => handleCantidadChange(item.id, item.cantidad + 1)}
+                          onClick={() => handleCantidadChange(item.id, item.cantidad + 1, item.stock)}
+                          disabled={item.cantidad >= (item.stock || 0)}
                         >
                           <i className="bi bi-plus-circle"></i>
                         </button>
