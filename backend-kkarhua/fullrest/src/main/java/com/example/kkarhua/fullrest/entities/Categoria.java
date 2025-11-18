@@ -3,7 +3,6 @@ package com.example.kkarhua.fullrest.entities;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
 @Table(name = "categorias")
@@ -18,16 +17,12 @@ public class Categoria {
     @Column(nullable = false, unique = true, length = 50)
     private String nombre;
 
-    @Column(length = 200)
-    private String descripcion;
-
     public Categoria() {
     }
 
-    public Categoria(Long id, String nombre, String descripcion) {
+    public Categoria(Long id, String nombre) {
         this.id = id;
         this.nombre = nombre;
-        this.descripcion = descripcion;
     }
 
     // Getters y Setters
@@ -47,16 +42,8 @@ public class Categoria {
         this.nombre = nombre;
     }
 
-    public String getDescripcion() {
-        return descripcion;
-    }
-
-    public void setDescripcion(String descripcion) {
-        this.descripcion = descripcion;
-    }
-
     @Override
     public String toString() {
-        return "Categoria [id=" + id + ", nombre=" + nombre + ", descripcion=" + descripcion + "]";
+        return "Categoria [id=" + id + ", nombre=" + nombre + "]";
     }
 }
