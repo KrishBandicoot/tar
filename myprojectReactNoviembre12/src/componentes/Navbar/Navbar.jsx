@@ -1,6 +1,11 @@
+// src/componentes/Navbar/Navbar.jsx
 import { Link } from 'react-router-dom';
+import { useCarrito } from '../../context/CarritoContext';
 
 export function Navbar(){
+    const { obtenerCantidadTotal } = useCarrito();
+    const cantidadItems = obtenerCantidadTotal();
+
     return (
             <nav className="navbar navbar-expand-sm bg-dark navbar-dark container-fluid">
                 <div className="container-fluid">
@@ -19,6 +24,16 @@ export function Navbar(){
                             </li> 
                             <li className="nav-item"> 
                             <Link className="nav-link" to="/contacto">Contacto</Link> 
+                            </li>
+                            <li className="nav-item">
+                            <Link className="nav-link position-relative" to="/carrito">
+                                <i className="bi bi-cart3"></i>
+                                {cantidadItems > 0 && (
+                                    <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                        {cantidadItems}
+                                    </span>
+                                )}
+                            </Link>
                             </li> 
                         </ul>
                     </div>                

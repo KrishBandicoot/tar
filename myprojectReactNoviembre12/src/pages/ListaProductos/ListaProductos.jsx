@@ -2,12 +2,14 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Navbar } from "../../componentes/Navbar/Navbar";
 import { Footer } from "../../componentes/Footer/Footer";
+import { useCarrito } from '../../context/CarritoContext';
 import './ListaProductos.css';
 
 const API_BASE_URL = 'http://localhost:8080/api';
 
 export function ListaProductos() {
     const navigate = useNavigate();
+    const { agregarAlCarrito } = useCarrito();
     const [productos, setProductos] = useState([]);
     const [categorias, setCategorias] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -318,9 +320,22 @@ export function ListaProductos() {
                                                     >
                                                         Ver Detalles
                                                     </button>
+                                                    <button 
+                                                        className="btn btn-success"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            agregarAlCarrito(producto, 1);
+                                                            alert(`${producto.nombre} añadido al carrito`);
+                                                        }}
+                                                        disabled={producto.estado !== 'activo'}
+                                                    >
+                                                        <i className="bi bi-cart-plus me-2"></i>
+                                                        Añadir al Carrito
+                                                    </button>
+                                                </div>
                                                 </div>
                                             </div>
-                                        </div>
+                                        
                                     ))}
                                 </div>
                             )}
