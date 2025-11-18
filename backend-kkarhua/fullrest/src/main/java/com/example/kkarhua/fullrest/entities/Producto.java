@@ -1,10 +1,6 @@
 package com.example.kkarhua.fullrest.entities;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.PrePersist;
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
@@ -13,11 +9,16 @@ public class Producto {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    
     private String nombre;
     private String descripcion;
     private int precio;
     private int stock;
-    private String categoria;
+    
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "categoria_id")
+    private Categoria categoria;
+    
     private String imagen;
     private String estado;
     private LocalDateTime fechaCreacion;
@@ -26,7 +27,7 @@ public class Producto {
     }
 
     public Producto(Long id, String nombre, String descripcion, int precio, int stock, 
-                    String categoria, String imagen, String estado) {
+                    Categoria categoria, String imagen, String estado) {
         this.id = id;
         this.nombre = nombre;
         this.descripcion = descripcion;
@@ -45,6 +46,7 @@ public class Producto {
         }
     }
 
+    // Getters y Setters
     public Long getId() {
         return id;
     }
@@ -85,11 +87,11 @@ public class Producto {
         this.stock = stock;
     }
 
-    public String getCategoria() {
+    public Categoria getCategoria() {
         return categoria;
     }
 
-    public void setCategoria(String categoria) {
+    public void setCategoria(Categoria categoria) {
         this.categoria = categoria;
     }
 
@@ -120,7 +122,8 @@ public class Producto {
     @Override
     public String toString() {
         return "Producto [id=" + id + ", nombre=" + nombre + ", descripcion=" + descripcion + 
-               ", precio=" + precio + ", stock=" + stock + ", categoria=" + categoria + 
+               ", precio=" + precio + ", stock=" + stock + 
+               ", categoria=" + (categoria != null ? categoria.getNombre() : "Sin categoría") + 
                ", imagen=" + imagen + ", estado=" + estado + ", fechaCreacion=" + fechaCreacion + "]";
     }
 }
