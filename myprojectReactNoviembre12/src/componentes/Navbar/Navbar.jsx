@@ -1,4 +1,3 @@
-// src/componentes/Navbar/Navbar.jsx
 import { Link } from 'react-router-dom';
 import { useCarrito } from '../../context/CarritoContext';
 

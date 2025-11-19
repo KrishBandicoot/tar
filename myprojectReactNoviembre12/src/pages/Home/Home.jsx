@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import { Navbar } from "../../componentes/Navbar/Navbar";
 import { Footer } from "../../componentes/Footer/Footer";
 import './Home.css';
@@ -8,6 +9,7 @@ const API_BASE_URL = 'http://localhost:8080/api';
 
 export function Home() {
     const navigate = useNavigate();
+    const { user, logout } = useAuth();
     const [productos, setProductos] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -26,7 +28,6 @@ export function Home() {
             }
 
             const data = await response.json();
-            // Filtrar solo productos activos y limitar a 8
             const productosActivos = data
                 .filter(p => p.estado === 'activo')
                 .slice(0, 8);
@@ -48,27 +49,49 @@ export function Home() {
         navigate('/lista-productos');
     };
 
-    // Función para obtener la URL completa de la imagen
+    const handleLogout = () => {
+        if (window.confirm('¿Estás seguro de que quieres cerrar sesión?')) {
+            logout();
+            alert('Sesión cerrada exitosamente');
+        }
+    };
+
     const getImageUrl = (producto) => {
         if (!producto.imagen) {
             return 'https://via.placeholder.com/400x300?text=Sin+Imagen';
         }
-        // Si la imagen ya es una URL completa, la retornamos tal cual
         if (producto.imagen.startsWith('http')) {
             return producto.imagen;
         }
-        // Si no, construimos la URL usando el endpoint de imágenes
         return `${API_BASE_URL}/imagenes/${producto.imagen}`;
     };
 
     return (
         <>
-            {/* Navbar sin contenedor para que ocupe todo el ancho */}
             <Navbar />
 
             {/* Auth Links */}
             <div className="auth-links">
-                <a href="IniciarSesion">Iniciar Sesion</a> | <a href="Registrar">Registrar</a>
+                {user ? (
+                    <div className="d-flex align-items-center justify-content-center gap-3">
+                        <span className="text-dark">
+                            <i className="bi bi-person-circle me-2"></i>
+                            Bienvenido, <strong>{user.nombre}</strong>
+                        </span>
+                        <button 
+                            onClick={handleLogout}
+                            className="btn btn-sm btn-outline-danger"
+                            style={{ fontSize: '0.85rem' }}
+                        >
+                            <i className="bi bi-box-arrow-right me-1"></i>
+                            Cerrar Sesión
+                        </button>
+                    </div>
+                ) : (
+                    <>
+                        <a href="/IniciarSesion">Iniciar Sesión</a> | <a href="/Registrar">Registrar</a>
+                    </>
+                )}
             </div>
 
             {/* Hero Section */}
@@ -137,7 +160,6 @@ export function Home() {
                                             className="card-img-top" 
                                             alt={producto.nombre}
                                             onError={(e) => {
-                                                // Si la imagen falla al cargar, mostrar placeholder
                                                 e.target.src = 'https://via.placeholder.com/400x300?text=Sin+Imagen';
                                             }}
                                         />
@@ -170,7 +192,6 @@ export function Home() {
                 )}
             </div>
 
-            
             <Footer />
         </>
     );

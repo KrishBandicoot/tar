@@ -1,6 +1,6 @@
-// src/pages/Registrar/Registrar.jsx
 import { useState } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import { Navbar } from '../../componentes/Navbar/Navbar';
 import { Footer } from '../../componentes/Footer/Footer';
 import './Registrar.css';
@@ -9,6 +9,7 @@ const API_BASE_URL = 'http://localhost:8080/api';
 
 export function Registrar() {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [searchParams] = useSearchParams();
   const redirectTo = searchParams.get('redirect') || '/';
 
@@ -115,10 +116,8 @@ export function Registrar() {
         throw new Error('Error al registrar usuario');
       }
 
-      // Guardar tokens y usuario en localStorage
-      localStorage.setItem('accessToken', data.accessToken);
-      localStorage.setItem('refreshToken', data.refreshToken);
-      localStorage.setItem('user', JSON.stringify(data.user));
+      // Usar el método login del contexto
+      login(data.user, data.accessToken, data.refreshToken);
 
       // Mostrar mensaje de éxito
       alert('¡Cuenta creada exitosamente! Bienvenido a Kkarhua');
