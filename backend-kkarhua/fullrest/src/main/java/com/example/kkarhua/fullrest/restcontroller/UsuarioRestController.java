@@ -78,22 +78,33 @@ public class UsuarioRestController {
             BindingResult result,
             @RequestParam(required = false, defaultValue = "false") boolean autoLogin) {
         
+        System.out.println("📝 UsuarioRestController.crear() - Iniciando registro");
+        System.out.println("📧 Email: " + unUsuario.getEmail());
+        System.out.println("👤 Nombre: " + unUsuario.getNombre());
+        System.out.println("🔐 AutoLogin: " + autoLogin);
+        
+        // Validar errores de BindingResult
         if (result.hasErrors()) {
+            System.out.println("❌ Errores de validación detectados");
             return validar(result);
         }
         
         // Validar si el email ya existe
         if (usuarioServices.existsByEmail(unUsuario.getEmail())) {
+            System.out.println("❌ Email ya está registrado: " + unUsuario.getEmail());
             return ResponseEntity.badRequest()
                 .body(Map.of("error", "El email ya está registrado"));
         }
         
         try {
             // Guardar usuario (contraseña se encripta automáticamente)
+            System.out.println("💾 Guardando usuario en la base de datos");
             Usuario usuarioGuardado = usuarioServices.save(unUsuario);
+            System.out.println("✅ Usuario guardado con ID: " + usuarioGuardado.getId());
             
             // Si autoLogin es true, generar tokens JWT
             if (autoLogin) {
+                System.out.println("🔑 Generando tokens JWT para auto-login");
                 String accessToken = jwtUtil.generateToken(
                     usuarioGuardado.getEmail(), 
                     usuarioGuardado.getRol(), 
@@ -115,13 +126,17 @@ public class UsuarioRestController {
                     "estado", usuarioGuardado.getEstado()
                 ));
                 
+                System.out.println("✅ Tokens generados exitosamente");
                 return ResponseEntity.status(HttpStatus.CREATED).body(response);
             }
             
             // Si no autoLogin, solo retornar el usuario creado
+            System.out.println("✅ Usuario creado sin auto-login");
             return ResponseEntity.status(HttpStatus.CREATED).body(usuarioGuardado);
             
         } catch (Exception e) {
+            System.out.println("❌ Error al crear usuario: " + e.getMessage());
+            e.printStackTrace();
             Map<String, String> error = new HashMap<>();
             error.put("error", "Error al crear usuario: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
@@ -186,6 +201,7 @@ public class UsuarioRestController {
         result.getFieldErrors().forEach(err -> {
             errores.put(err.getField(), "El campo " + err.getField() + " " + err.getDefaultMessage());
         });
+        System.out.println("❌ Errores de validación: " + errores);
         return ResponseEntity.badRequest().body(errores);
     }
 }

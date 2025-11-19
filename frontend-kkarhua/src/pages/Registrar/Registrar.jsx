@@ -87,6 +87,12 @@ export function Registrar() {
     setErrors({});
 
     try {
+      console.log('📝 Iniciando registro con datos:', {
+        nombre: formData.nombre,
+        email: formData.email,
+        rol: 'cliente'
+      });
+
       // Enviar datos al endpoint con autoLogin=true
       const response = await fetch(`${API_BASE_URL}/usuarios?autoLogin=true`, {
         method: 'POST',
@@ -101,21 +107,31 @@ export function Registrar() {
         })
       });
 
+      console.log('📡 Response status:', response.status);
+      console.log('📡 Response ok:', response.ok);
+
       const data = await response.json();
+      console.log('📦 Response data:', data);
 
       if (!response.ok) {
         // Manejar errores específicos del backend
         if (data.error) {
+          console.error('❌ Error del servidor:', data.error);
           throw new Error(data.error);
         }
+        
         // Manejar errores de validación de campos
         if (typeof data === 'object' && !data.error) {
+          console.error('❌ Errores de validación:', data);
           setErrors(data);
           throw new Error('Por favor corrige los errores en el formulario');
         }
+        
         throw new Error('Error al registrar usuario');
       }
 
+      console.log('✅ Usuario registrado exitosamente');
+      
       // Usar el método login del contexto
       login(data.user, data.accessToken, data.refreshToken);
 
@@ -132,7 +148,11 @@ export function Registrar() {
       }
 
     } catch (err) {
-      setErrors({ general: err.message || 'Error al crear la cuenta. Intenta nuevamente.' });
+      console.error('❌ Error en registro:', err);
+      setErrors({ 
+        general: err.message || 'Error al crear la cuenta. Intenta nuevamente.' 
+      });
+      setLoading(false);
     } finally {
       setLoading(false);
     }
@@ -263,6 +283,12 @@ export function Registrar() {
                       <i className={`bi ${passwordRequirements.hasNumber ? 'bi-check-circle-fill' : 'bi-circle'} me-1`}></i>
                       Un número
                     </small>
+                  </div>
+                )}
+                
+                {errors.contrasena && (
+                  <div className="invalid-feedback d-block">
+                    {errors.contrasena}
                   </div>
                 )}
               </div>

@@ -49,6 +49,10 @@ export function Home() {
         navigate('/lista-productos');
     };
 
+    const handleIrAlAdmin = () => {
+        navigate('/admin');
+    };
+
     const handleLogout = () => {
         if (window.confirm('¿Estás seguro de que quieres cerrar sesión?')) {
             logout();
@@ -66,6 +70,9 @@ export function Home() {
         return `${API_BASE_URL}/imagenes/${producto.imagen}`;
     };
 
+    // Verificar si el usuario es super-admin
+    const isSuperAdmin = user && user.rol === 'super-admin';
+
     return (
         <>
             <Navbar />
@@ -73,11 +80,25 @@ export function Home() {
             {/* Auth Links */}
             <div className="auth-links">
                 {user ? (
-                    <div className="d-flex align-items-center justify-content-center gap-3">
+                    <div className="d-flex align-items-center justify-content-center gap-3 flex-wrap">
                         <span className="text-dark">
                             <i className="bi bi-person-circle me-2"></i>
                             Bienvenido, <strong>{user.nombre}</strong>
                         </span>
+                        
+                        {/* Botón visible solo para super-admin */}
+                        {isSuperAdmin && (
+                            <button 
+                                onClick={handleIrAlAdmin}
+                                className="btn btn-sm btn-warning"
+                                style={{ fontSize: '0.85rem' }}
+                                title="Panel de administración"
+                            >
+                                <i className="bi bi-speedometer2 me-1"></i>
+                                Panel Admin
+                            </button>
+                        )}
+                        
                         <button 
                             onClick={handleLogout}
                             className="btn btn-sm btn-outline-danger"

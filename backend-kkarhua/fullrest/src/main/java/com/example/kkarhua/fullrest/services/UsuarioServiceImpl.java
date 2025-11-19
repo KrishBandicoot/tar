@@ -38,12 +38,27 @@ public class UsuarioServiceImpl implements UsuarioServices {
     @Override
     @Transactional
     public Usuario save(Usuario unUsuario) {
-        // Si es un nuevo usuario o la contraseña ha sido modificada, encriptarla
-        if (unUsuario.getId() == null || !unUsuario.getContrasena().startsWith("$2a$")) {
+        System.out.println("💾 UsuarioServiceImpl.save() - Guardando usuario: " + unUsuario.getEmail());
+        
+        // Solo encriptar la contraseña si es un usuario nuevo (ID es null)
+        if (unUsuario.getId() == null) {
+            System.out.println("🔐 Usuario nuevo - Encriptando contraseña");
             String contrasenaEncriptada = passwordEncoder.encode(unUsuario.getContrasena());
             unUsuario.setContrasena(contrasenaEncriptada);
+        } else if (unUsuario.getContrasena() != null && 
+                   !unUsuario.getContrasena().startsWith("$2a$") &&
+                   !unUsuario.getContrasena().startsWith("$2b$") &&
+                   !unUsuario.getContrasena().startsWith("$2y$")) {
+            System.out.println("🔐 Usuario existente con contraseña sin encriptar - Encriptando");
+            String contrasenaEncriptada = passwordEncoder.encode(unUsuario.getContrasena());
+            unUsuario.setContrasena(contrasenaEncriptada);
+        } else {
+            System.out.println("✅ Contraseña ya está encriptada o no ha cambiado");
         }
-        return usuarioRepository.save(unUsuario);
+        
+        Usuario usuarioGuardado = usuarioRepository.save(unUsuario);
+        System.out.println("✅ Usuario guardado exitosamente con ID: " + usuarioGuardado.getId());
+        return usuarioGuardado;
     }
 
     @Override
