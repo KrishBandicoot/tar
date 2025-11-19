@@ -126,6 +126,11 @@
 
 /* Responsive */
 @media (max-width: 768px) {
+    .lista-productos-container {
+        padding-top: 30px;
+        padding-bottom: 80px;
+    }
+
     .lista-productos-header h1 {
         font-size: 2rem;
     }

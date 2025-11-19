@@ -3,7 +3,20 @@
   display: flex;
   min-height: 100vh;
   background-color: #f5f5f5;
-  margin-top: 60px;
+  padding-top: 60px; /* Espacio para el navbar fijo */
+}
+
+/* ==================== NAVBAR SUPERIOR (AdminNavbar) ==================== */
+/* Estos estilos deberían estar en AdminNavbar.jsx o en un archivo CSS separado, 
+   pero los incluyo aquí para que funcione correctamente */
+.navbar.bg-dark {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  margin: 0 !important;
+  width: 100%;
 }
 
 /* ==================== SIDEBAR ==================== */
@@ -14,21 +27,16 @@
   padding: 20px;
   transition: width 0.3s ease;
   position: fixed;
-  top: 0;
+  top: 60px; /* Comienza después del navbar */
   left: 0;
-  height: 100vh;
+  height: calc(100vh - 60px); /* Altura total menos el navbar */
   overflow-y: auto;
   overflow-x: hidden;
   z-index: 100;
-  margin-top: 60px;
 }
 
 .admin-sidebar.open {
   width: 250px;
-}
-
-.admin-sidebar.collapsed {
-  width: 80px;
 }
 
 .admin-sidebar.collapsed {
@@ -117,7 +125,7 @@
   transition: margin-left 0.3s ease;
   overflow-y: auto;
   width: calc(100% - 250px);
-  max-height: calc(100vh - 60px);
+  max-height: calc(100vh - 60px); /* Altura total menos el navbar */
 }
 
 .admin-main.sidebar-collapsed {

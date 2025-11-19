@@ -191,8 +191,6 @@ export function Admin() {
           </div>
         </main>
       </div>
-
-      <Footer />
     </>
   );
 }
