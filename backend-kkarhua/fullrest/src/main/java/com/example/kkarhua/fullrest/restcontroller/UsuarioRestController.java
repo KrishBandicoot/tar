@@ -15,8 +15,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import com.example.kkarhua.fullrest.entities.Usuario;
+import com.example.kkarhua.fullrest.security.JwtUtil;
 import com.example.kkarhua.fullrest.services.UsuarioServices;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -26,7 +28,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 
-@Tag(name = "Usuarios", description = "Operaciones relacionadas con usuarios")
+@Tag(name = "Usuarios", description = "Operaciones relacionadas con usuarios (CRUD completo)")
 @RestController
 @RequestMapping("api/usuarios")
 public class UsuarioRestController {
@@ -34,7 +36,10 @@ public class UsuarioRestController {
     @Autowired
     private UsuarioServices usuarioServices;
 
-    @Operation(summary = "Obtener lista de usuarios", description = "Devuelve todos los usuarios registrados")
+    @Autowired
+    private JwtUtil jwtUtil;
+
+    @Operation(summary = "Obtener lista de usuarios", description = "Devuelve todos los usuarios registrados (Solo SUPER-ADMIN)")
     @ApiResponse(responseCode = "200", description = "Lista de usuarios retornada correctamente",
                  content = @Content(mediaType = "application/json", 
                  schema = @Schema(implementation = Usuario.class)))
@@ -58,11 +63,21 @@ public class UsuarioRestController {
         return ResponseEntity.notFound().build();
     }
 
-    @Operation(summary = "Crear un nuevo usuario", description = "Crea un usuario con los datos proporcionados")
-    @ApiResponse(responseCode = "201", description = "Usuario creado correctamente",
-                 content = @Content(mediaType = "application/json", schema = @Schema(implementation = Usuario.class)))
+    @Operation(
+        summary = "Crear nuevo usuario / Registro", 
+        description = "Crea un nuevo usuario y opcionalmente retorna tokens JWT para auto-login. " +
+                     "Si se envía el parámetro ?autoLogin=true, retorna tokens JWT para iniciar sesión automáticamente."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "201", description = "Usuario creado correctamente"),
+        @ApiResponse(responseCode = "400", description = "Datos inválidos o email ya existe")
+    })
     @PostMapping
-    public ResponseEntity<?> crear(@Valid @RequestBody Usuario unUsuario, BindingResult result) {
+    public ResponseEntity<?> crear(
+            @Valid @RequestBody Usuario unUsuario, 
+            BindingResult result,
+            @RequestParam(required = false, defaultValue = "false") boolean autoLogin) {
+        
         if (result.hasErrors()) {
             return validar(result);
         }
@@ -73,7 +88,44 @@ public class UsuarioRestController {
                 .body(Map.of("error", "El email ya está registrado"));
         }
         
-        return ResponseEntity.status(HttpStatus.CREATED).body(usuarioServices.save(unUsuario));
+        try {
+            // Guardar usuario (contraseña se encripta automáticamente)
+            Usuario usuarioGuardado = usuarioServices.save(unUsuario);
+            
+            // Si autoLogin es true, generar tokens JWT
+            if (autoLogin) {
+                String accessToken = jwtUtil.generateToken(
+                    usuarioGuardado.getEmail(), 
+                    usuarioGuardado.getRol(), 
+                    usuarioGuardado.getId()
+                );
+                String refreshToken = jwtUtil.generateRefreshToken(usuarioGuardado.getEmail());
+                
+                Map<String, Object> response = new HashMap<>();
+                response.put("message", "Usuario registrado exitosamente");
+                response.put("accessToken", accessToken);
+                response.put("refreshToken", refreshToken);
+                response.put("tokenType", "Bearer");
+                response.put("expiresIn", 86400);
+                response.put("user", Map.of(
+                    "id", usuarioGuardado.getId(),
+                    "nombre", usuarioGuardado.getNombre(),
+                    "email", usuarioGuardado.getEmail(),
+                    "rol", usuarioGuardado.getRol(),
+                    "estado", usuarioGuardado.getEstado()
+                ));
+                
+                return ResponseEntity.status(HttpStatus.CREATED).body(response);
+            }
+            
+            // Si no autoLogin, solo retornar el usuario creado
+            return ResponseEntity.status(HttpStatus.CREATED).body(usuarioGuardado);
+            
+        } catch (Exception e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("error", "Error al crear usuario: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+        }
     }
 
     @Operation(summary = "Actualizar usuario", description = "Actualiza un usuario existente")
