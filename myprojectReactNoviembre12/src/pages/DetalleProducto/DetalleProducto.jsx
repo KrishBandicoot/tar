@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Navbar } from '../../componentes/Navbar/Navbar';
 import { Footer } from '../../componentes/Footer/Footer';
+import { useCarrito } from '../../context/CarritoContext';
 import './DetalleProducto.css';
 
 const API_BASE_URL = 'http://localhost:8080/api';
@@ -9,6 +10,7 @@ const API_BASE_URL = 'http://localhost:8080/api';
 export function DetalleProducto() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { agregarAlCarrito } = useCarrito();
   
   const [producto, setProducto] = useState(null);
   const [productosRelacionados, setProductosRelacionados] = useState([]);
@@ -32,7 +34,7 @@ export function DetalleProducto() {
       }
 
       const data = await response.json();
-      console.log('Producto cargado:', data); // Para debug
+      console.log('Producto cargado:', data);
       setProducto(data);
       setError(null);
     } catch (err) {
@@ -48,7 +50,6 @@ export function DetalleProducto() {
       const response = await fetch(`${API_BASE_URL}/productos`);
       if (response.ok) {
         const data = await response.json();
-        // Filtrar el producto actual y tomar solo 5 productos activos
         const relacionados = data
           .filter(p => p.id !== parseInt(id) && p.estado === 'activo')
           .slice(0, 5);
@@ -60,18 +61,36 @@ export function DetalleProducto() {
   };
 
   const handleAgregarCarrito = () => {
-    alert(`Agregado al carrito: ${cantidad} x ${producto.nombre}`);
-    // Aquí puedes agregar la lógica real del carrito
+    if (!producto.stock || producto.stock === 0) {
+      alert('Lo sentimos, este producto no tiene stock disponible');
+      return;
+    }
+
+    if (cantidad > producto.stock) {
+      alert(`Solo hay ${producto.stock} unidades disponibles`);
+      setCantidad(producto.stock);
+      return;
+    }
+
+    agregarAlCarrito(producto, cantidad);
+    alert(`✅ ${cantidad} x ${producto.nombre} agregado al carrito`);
+    setCantidad(1);
   };
 
   const handleCantidadChange = (e) => {
     const valor = parseInt(e.target.value);
+    const stockDisponible = producto?.stock || 1;
+    
     if (valor > 0) {
-      setCantidad(valor);
+      if (valor > stockDisponible) {
+        alert(`Solo hay ${stockDisponible} unidades disponibles`);
+        setCantidad(stockDisponible);
+      } else {
+        setCantidad(valor);
+      }
     }
   };
 
-  // Función para obtener la URL completa de la imagen
   const getImageUrl = (imagenNombre) => {
     if (!imagenNombre) {
       return null;
@@ -82,16 +101,13 @@ export function DetalleProducto() {
     return `${API_BASE_URL}/imagenes/${imagenNombre}`;
   };
 
-  // ⭐ FUNCIÓN NUEVA: Obtener el nombre de la categoría
   const getNombreCategoria = (categoria) => {
     if (!categoria) {
       return 'Sin categoría';
     }
-    // Si es un objeto, extraer el nombre
     if (typeof categoria === 'object' && categoria.nombre) {
       return categoria.nombre;
     }
-    // Si es un string, retornarlo directamente
     if (typeof categoria === 'string') {
       return categoria;
     }
@@ -141,7 +157,6 @@ export function DetalleProducto() {
       
       <div className="detalle-producto-container">
         <div className="container">
-          {/* Breadcrumb */}
           <nav className="breadcrumb-nav">
             <Link to="/">Home</Link>
             <span>›</span>
@@ -150,9 +165,7 @@ export function DetalleProducto() {
             <span>{producto.nombre}</span>
           </nav>
 
-          {/* Contenido del producto */}
           <div className="producto-content">
-            {/* Sección de imágenes */}
             <div className="producto-imagenes">
               <div className="imagen-principal">
                 {imagenUrl ? (
@@ -196,7 +209,6 @@ export function DetalleProducto() {
               </div>
             </div>
 
-            {/* Sección de información */}
             <div className="producto-info">
               <div className="producto-header">
                 <h1 className="producto-titulo">{producto.nombre}</h1>
@@ -210,7 +222,6 @@ export function DetalleProducto() {
 
               <div className="producto-detalles">
                 <p><strong>Stock disponible:</strong> {producto.stock || 0} unidades</p>
-                {/* ⭐ CORRECCIÓN AQUÍ */}
                 <p><strong>Categoría:</strong> {getNombreCategoria(producto.categoria)}</p>
                 <p><strong>Estado:</strong> <span className={`badge ${producto.estado === 'activo' ? 'bg-success' : 'bg-secondary'}`}>
                   {producto.estado || 'N/A'}
@@ -239,7 +250,6 @@ export function DetalleProducto() {
             </div>
           </div>
 
-          {/* Productos relacionados */}
           {productosRelacionados.length > 0 && (
             <div className="productos-relacionados">
               <h3>Productos Relacionados</h3>

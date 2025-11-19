@@ -28,7 +28,6 @@ export function IniciarSesion() {
       ...prev,
       [name]: value
     }));
-    // Limpiar error al escribir
     if (error) setError('');
   };
 
@@ -52,22 +51,19 @@ export function IniciarSesion() {
         throw new Error(data.error || 'Error al iniciar sesión');
       }
 
-      // Usar el método login del contexto
       login(data.user, data.accessToken, data.refreshToken);
 
-      // Verificar si había una compra pendiente
       const intendedPurchase = localStorage.getItem('intendedPurchase');
       if (intendedPurchase) {
         localStorage.removeItem('intendedPurchase');
         navigate('/carrito');
       } else {
-        // Redirigir según rol
         if (data.user.rol === 'super-admin') {
-          navigate('/productos'); // Panel admin
+          navigate('/admin');
         } else if (data.user.rol === 'vendedor') {
-          navigate('/productos'); // Panel vendedor
+          navigate('/productos');
         } else {
-          navigate(redirectTo); // Cliente va a donde venía
+          navigate(redirectTo);
         }
       }
 

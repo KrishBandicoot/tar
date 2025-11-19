@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { CarritoProvider } from './context/CarritoContext';
 import { Home } from './pages/Home/Home';
+import { HomeAdmin } from './pages/AdminHome/HomeAdmin';
 import { Contacto } from './pages/Contacto/Contacto';
 import { ListaProductos } from './pages/ListaProductos/ListaProductos';
 import { DetalleProducto } from './pages/DetalleProducto/DetalleProducto';
@@ -21,6 +22,7 @@ function App() {
         <Router>
           <Routes>
               <Route path="/" element={<Home />} />
+              <Route path="/admin" element={<HomeAdmin />} />
               <Route path="/contacto" element={<Contacto />} />
               <Route path="/lista-productos" element={<ListaProductos />} />
               <Route path="/productos" element={<Productos />} />
