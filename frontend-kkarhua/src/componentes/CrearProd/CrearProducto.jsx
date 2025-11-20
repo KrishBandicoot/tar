@@ -26,11 +26,41 @@ export function CrearProducto() {
   const [loadingCategorias, setLoadingCategorias] = useState(true);
 
   const menuItems = [
-    { icon: 'bi-speedometer2', label: 'Dashboard', path: '/admin' },
-    { icon: 'bi-box-seam', label: 'Productos', path: '/productos' },
-    { icon: 'bi-plus-circle', label: 'Crear Producto', path: '/crear-producto' },
-    { icon: 'bi-shop', label: 'Ver Tienda', path: '/lista-productos' },
-    { icon: 'bi-house', label: 'Inicio', path: '/' }
+    {
+      icon: 'bi-speedometer2',
+      label: 'Dashboard',
+      path: '/admin'
+    },
+    {
+      icon: 'bi-box-seam',
+      label: 'Productos',
+      path: '/productos'
+    },
+    {
+      icon: 'bi-plus-circle',
+      label: 'Crear Producto',
+      path: '/crear-producto'
+    },
+    {
+      icon: 'bi-people',
+      label: 'Usuarios',
+      path: '/usuarios'
+    },
+    {
+      icon: 'bi-person-plus',
+      label: 'Crear Usuario',
+      path: '/crear-usuario'
+    },
+    {
+      icon: 'bi-shop',
+      label: 'Ver Tienda',
+      path: '/lista-productos'
+    },
+    {
+      icon: 'bi-house',
+      label: 'Inicio',
+      path: '/'
+    }
   ];
 
   useEffect(() => {

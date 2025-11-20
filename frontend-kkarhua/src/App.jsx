@@ -12,6 +12,8 @@ import { Registrar } from './pages/Registrar/Registrar';
 import { CrearProducto } from './componentes/CrearProd/CrearProducto';
 import { EditarProd } from './componentes/EditarProd/EditarProd';
 import { Productos } from './componentes/Productos/Productos';
+import { Usuarios } from './pages/Usuarios/Usuarios';
+import { CrearUsuario } from './pages/CrearUsuario/CrearUsuario';
 import './App.css'  
 
 function App() {
@@ -33,9 +35,13 @@ function App() {
               <Route path="/IniciarSesion" element={<IniciarSesion />} />
               <Route path="/Registrar" element={<Registrar />} />
               
-              {/* Rutas de administración */}
+              {/* Rutas de administración de productos */}
               <Route path="/crear-producto" element={<CrearProducto />} /> 
               <Route path="/editar-producto/:id" element={<EditarProd />} />
+
+              {/* Rutas de administración de usuarios */}
+              <Route path="/usuarios" element={<Usuarios />} />
+              <Route path="/crear-usuario" element={<CrearUsuario />} />
            </Routes>
         </Router>
       </CarritoProvider>

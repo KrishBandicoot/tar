@@ -35,6 +35,16 @@ export function Admin() {
       path: '/crear-producto'
     },
     {
+      icon: 'bi-people',
+      label: 'Usuarios',
+      path: '/usuarios'
+    },
+    {
+      icon: 'bi-person-plus',
+      label: 'Crear Usuario',
+      path: '/crear-usuario'
+    },
+    {
       icon: 'bi-shop',
       label: 'Ver Tienda',
       path: '/lista-productos'
@@ -90,16 +100,28 @@ export function Admin() {
       path: '/productos'
     },
     {
+      icon: 'bi-plus-square',
+      title: 'Crear Producto',
+      desc: 'Agregar nuevos productos al inventario',
+      path: '/crear-producto'
+    },
+    {
+      icon: 'bi-people',
+      title: 'Usuarios',
+      desc: 'Gestionar usuarios y sus permisos',
+      path: '/usuarios'
+    },
+    {
+      icon: 'bi-person-plus',
+      title: 'Crear Usuario',
+      desc: 'Agregar nuevos usuarios al sistema',
+      path: '/crear-usuario'
+    },
+    {
       icon: 'bi-tags',
       title: 'Categorías',
       desc: 'Organizar productos por categorías',
       path: '/categorias'
-    },
-    {
-      icon: 'bi-person-circle',
-      title: 'Perfil',
-      desc: 'Ver información personal y configurar cuenta',
-      path: '#'
     },
     {
       icon: 'bi-shop',

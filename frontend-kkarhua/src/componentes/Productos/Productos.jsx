@@ -21,12 +21,43 @@ export function Productos() {
     const [archivoImagen, setArchivoImagen] = useState(null);
     const [guardandoProducto, setGuardandoProducto] = useState(false);
 
-    const menuItems = [
-        { icon: 'bi-speedometer2', label: 'Dashboard', path: '/admin' },
-        { icon: 'bi-box-seam', label: 'Productos', path: '/productos' },
-        { icon: 'bi-shop', label: 'Ver Tienda', path: '/lista-productos' },
-        { icon: 'bi-house', label: 'Inicio', path: '/' }
-    ];
+  const menuItems = [
+    {
+      icon: 'bi-speedometer2',
+      label: 'Dashboard',
+      path: '/admin'
+    },
+    {
+      icon: 'bi-box-seam',
+      label: 'Productos',
+      path: '/productos'
+    },
+    {
+      icon: 'bi-plus-circle',
+      label: 'Crear Producto',
+      path: '/crear-producto'
+    },
+    {
+      icon: 'bi-people',
+      label: 'Usuarios',
+      path: '/usuarios'
+    },
+    {
+      icon: 'bi-person-plus',
+      label: 'Crear Usuario',
+      path: '/crear-usuario'
+    },
+    {
+      icon: 'bi-shop',
+      label: 'Ver Tienda',
+      path: '/lista-productos'
+    },
+    {
+      icon: 'bi-house',
+      label: 'Inicio',
+      path: '/'
+    }
+  ];
 
     useEffect(() => {
         cargarProductos();
