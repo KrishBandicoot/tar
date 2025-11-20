@@ -1,14 +1,19 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCarrito } from '../../context/CarritoContext';
+import { useAuth } from '../../context/AuthContext';
 import { Navbar } from '../../componentes/Navbar/Navbar';
 import { Footer } from '../../componentes/Footer/Footer';
+import { CheckoutModal } from '../../componentes/CheckoutModal/CheckoutModal';
 import './Carrito.css';
 
 const API_BASE_URL = 'http://localhost:8080/api';
 
 export function Carrito() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { items, eliminarDelCarrito, actualizarCantidad, vaciarCarrito, obtenerTotal } = useCarrito();
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
 
   const getImageUrl = (imagen) => {
     if (!imagen) return 'https://via.placeholder.com/80x80?text=Sin+Imagen';
@@ -28,11 +33,18 @@ export function Carrito() {
     }
   };
 
-  const handleProcederPago = () => {
-    alert('Funcionalidad de pago en desarrollo');
+  const handleCheckout = () => {
+    if (!user) {
+      // Si no está logeado, redirigir a login
+      localStorage.setItem('intendedPurchase', 'true');
+      navigate('/IniciarSesion?redirect=/carrito');
+      return;
+    }
+
+    // Si está logeado, abrir el modal
+    setCheckoutOpen(true);
   };
 
-  // Función para navegar al detalle del producto
   const handleVerDetalleProducto = (productoId) => {
     navigate(`/producto/${productoId}`);
   };
@@ -193,9 +205,10 @@ export function Carrito() {
 
                   <button 
                     className="btn btn-success w-100 btn-lg mt-3"
-                    onClick={handleProcederPago}
+                    onClick={handleCheckout}
                   >
-                    PAGAR
+                    <i className="bi bi-bag-check me-2"></i>
+                    CHECKOUT
                   </button>
 
                   <div className="info-envio mt-4">
@@ -214,6 +227,14 @@ export function Carrito() {
           </div>
         </div>
       </div>
+
+      {/* Checkout Modal */}
+      <CheckoutModal 
+        isOpen={checkoutOpen}
+        onClose={() => setCheckoutOpen(false)}
+        total={obtenerTotal()}
+        items={items}
+      />
 
       <Footer />
     </>
