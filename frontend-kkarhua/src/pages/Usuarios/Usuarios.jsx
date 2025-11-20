@@ -182,13 +182,6 @@ export function Usuarios() {
                 <main className="admin-main">
                     <div className="usuarios-header">
                         <h1 className="page-title">Gestión de Usuarios</h1>
-                        <button 
-                            className="btn btn-primary"
-                            onClick={() => navigate('/crear-usuario')}
-                        >
-                            <i className="bi bi-person-plus me-2"></i>
-                            Crear Usuario
-                        </button>
                     </div>
 
                     <div className="search-bar">

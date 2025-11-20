@@ -21,43 +21,15 @@ export function Productos() {
     const [archivoImagen, setArchivoImagen] = useState(null);
     const [guardandoProducto, setGuardandoProducto] = useState(false);
 
-  const menuItems = [
-    {
-      icon: 'bi-speedometer2',
-      label: 'Dashboard',
-      path: '/admin'
-    },
-    {
-      icon: 'bi-box-seam',
-      label: 'Productos',
-      path: '/productos'
-    },
-    {
-      icon: 'bi-plus-circle',
-      label: 'Crear Producto',
-      path: '/crear-producto'
-    },
-    {
-      icon: 'bi-people',
-      label: 'Usuarios',
-      path: '/usuarios'
-    },
-    {
-      icon: 'bi-person-plus',
-      label: 'Crear Usuario',
-      path: '/crear-usuario'
-    },
-    {
-      icon: 'bi-shop',
-      label: 'Ver Tienda',
-      path: '/lista-productos'
-    },
-    {
-      icon: 'bi-house',
-      label: 'Inicio',
-      path: '/'
-    }
-  ];
+    const menuItems = [
+        { icon: 'bi-speedometer2', label: 'Dashboard', path: '/admin' },
+        { icon: 'bi-box-seam', label: 'Productos', path: '/productos' },
+        { icon: 'bi-plus-circle', label: 'Crear Producto', path: '/crear-producto' },
+        { icon: 'bi-people', label: 'Usuarios', path: '/usuarios' },
+        { icon: 'bi-person-plus', label: 'Crear Usuario', path: '/crear-usuario' },
+        { icon: 'bi-shop', label: 'Ver Tienda', path: '/lista-productos' },
+        { icon: 'bi-house', label: 'Inicio', path: '/' }
+    ];
 
     useEffect(() => {
         cargarProductos();
@@ -119,8 +91,12 @@ export function Productos() {
         }
 
         try {
+            const token = localStorage.getItem('accessToken');
             const response = await fetch(`${API_BASE_URL}/productos/${id}`, {
-                method: 'DELETE'
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
             });
 
             if (!response.ok) throw new Error('Error al eliminar producto');
@@ -153,10 +129,7 @@ export function Productos() {
 
     const handleCambioProducto = (e) => {
         const { name, value } = e.target;
-        setProductoEditar(prev => ({
-            ...prev,
-            [name]: value
-        }));
+        setProductoEditar(prev => ({ ...prev, [name]: value }));
     };
 
     const handleCambioImagen = (e) => {
@@ -172,9 +145,7 @@ export function Productos() {
             }
             setArchivoImagen(file);
             const reader = new FileReader();
-            reader.onloadend = () => {
-                setImagenPreview(reader.result);
-            };
+            reader.onloadend = () => setImagenPreview(reader.result);
             reader.readAsDataURL(file);
         }
     };
@@ -184,63 +155,87 @@ export function Productos() {
         setGuardandoProducto(true);
 
         try {
-            // Objeto con solo los campos editables (SIN stock ni estado)
+            const token = localStorage.getItem('accessToken');
+
+            // PASO 1: Actualizar datos básicos del producto (SIN stock, SIN estado)
             const productoActualizado = {
                 nombre: productoEditar.nombre,
                 descripcion: productoEditar.descripcion,
                 precio: parseFloat(productoEditar.precio),
-                categoria: { id: parseInt(productoEditar.categoria) },
-                imagen: productoEditar.imagen
+                categoria: { id: parseInt(productoEditar.categoria) }
             };
 
-            // 1. Actualizar datos del producto
-            const response = await fetch(`${API_BASE_URL}/productos/${productoEditar.id}`, {
+            console.log('📝 Actualizando producto:', productoActualizado);
+
+            const responseProducto = await fetch(`${API_BASE_URL}/productos/${productoEditar.id}`, {
                 method: 'PUT',
                 headers: { 
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify(productoActualizado)
             });
 
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
+            if (!responseProducto.ok) {
+                const errorData = await responseProducto.json().catch(() => ({}));
                 throw new Error(errorData.message || 'Error al actualizar producto');
             }
 
-            // 2. Actualizar stock SOLO SI cambió (a través del StockController)
-            if (productoEditar.stock !== undefined && productoEditar.stock !== null) {
-                const stockResponse = await fetch(`${API_BASE_URL}/stock/${productoEditar.id}/actualizar`, {
+            console.log('✅ Producto actualizado correctamente');
+
+            // PASO 2: Actualizar stock usando el endpoint específico
+            const stockActual = productos.find(p => p.id === productoEditar.id)?.stock || 0;
+            const nuevoStock = parseInt(productoEditar.stock);
+
+            if (nuevoStock !== stockActual) {
+                console.log(`📊 Actualizando stock de ${stockActual} a ${nuevoStock}`);
+                
+                const responseStock = await fetch(`${API_BASE_URL}/stock/${productoEditar.id}/actualizar`, {
                     method: 'PATCH',
                     headers: { 
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
                     },
-                    body: JSON.stringify({ stock: parseInt(productoEditar.stock) })
+                    body: JSON.stringify({ stock: nuevoStock })
                 });
 
-                if (!stockResponse.ok) {
-                    console.warn('⚠️ Stock no se pudo actualizar, pero el producto sí');
+                if (!responseStock.ok) {
+                    console.warn('⚠️ Stock no se pudo actualizar');
+                    alert('⚠️ Producto actualizado, pero no se pudo actualizar el stock');
+                } else {
+                    console.log('✅ Stock actualizado correctamente');
                 }
             }
 
-            // 3. Subir imagen si cambió
+            // PASO 3: Subir nueva imagen si fue cambiada
             if (archivoImagen) {
+                console.log('📸 Subiendo nueva imagen');
+                
                 const formData = new FormData();
                 formData.append('file', archivoImagen);
 
-                const imgResponse = await fetch(`${API_BASE_URL}/imagenes/upload/${productoEditar.id}`, {
+                const responseImagen = await fetch(`${API_BASE_URL}/imagenes/upload/${productoEditar.id}`, {
                     method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    },
                     body: formData
                 });
 
-                if (!imgResponse.ok) {
-                    alert('Producto actualizado, pero hubo un error al subir la imagen');
+                if (!responseImagen.ok) {
+                    console.warn('⚠️ Error al subir imagen');
+                    alert('⚠️ Producto actualizado, pero hubo un error al subir la imagen');
+                } else {
+                    console.log('✅ Imagen subida correctamente');
                 }
             }
 
             alert('✅ Producto actualizado exitosamente');
             cerrarModal();
             cargarProductos();
+
         } catch (error) {
+            console.error('❌ Error:', error);
             alert('Error al guardar cambios: ' + error.message);
         } finally {
             setGuardandoProducto(false);
@@ -250,10 +245,8 @@ export function Productos() {
     return (
         <>
             <AdminNavbar />
-
             <div className="admin-wrapper">
                 <Sidebar menuItems={menuItems} currentPath="/productos" />
-
                 <main className="admin-main">
                     <div className="productos-header">
                         <h1 className="page-title">Gestión de Productos</h1>
@@ -262,18 +255,10 @@ export function Productos() {
                     <div className="search-bar">
                         <div className="search-input-wrapper">
                             <i className="bi bi-search search-icon"></i>
-                            <input
-                                type="text"
-                                className="search-input"
-                                placeholder="Buscar producto por nombre..."
-                                value={busqueda}
-                                onChange={handleBusquedaChange}
-                            />
+                            <input type="text" className="search-input" placeholder="Buscar producto por nombre..."
+                                value={busqueda} onChange={handleBusquedaChange} />
                             {busqueda && (
-                                <button 
-                                    className="clear-search"
-                                    onClick={() => setBusqueda('')}
-                                >
+                                <button className="clear-search" onClick={() => setBusqueda('')}>
                                     <i className="bi bi-x-circle"></i>
                                 </button>
                             )}
@@ -296,31 +281,20 @@ export function Productos() {
                         <div className="empty-state">
                             <i className="bi bi-inbox empty-icon"></i>
                             <h3>No se encontraron productos</h3>
-                            <p>
-                                {busqueda 
-                                    ? `No hay productos que coincidan con "${busqueda}"`
-                                    : 'Aún no has agregado productos'}
-                            </p>
+                            <p>{busqueda ? `No hay productos que coincidan con "${busqueda}"` : 'Aún no has agregado productos'}</p>
                         </div>
                     ) : (
                         <div className="productos-grid">
                             {productosFiltrados.map((producto) => (
                                 <div key={producto.id} className="producto-card">
                                     <div className="producto-imagen">
-                                        <img 
-                                            src={getImageUrl(producto.imagen)} 
-                                            alt={producto.nombre}
-                                            onError={(e) => {
-                                                e.target.src = 'https://via.placeholder.com/300x200?text=Sin+Imagen';
-                                            }}
-                                        />
+                                        <img src={getImageUrl(producto.imagen)} alt={producto.nombre}
+                                            onError={(e) => { e.target.src = 'https://via.placeholder.com/300x200?text=Sin+Imagen'; }} />
                                     </div>
                                     <div className="producto-info">
                                         <h3 className="producto-nombre">{producto.nombre}</h3>
                                         <p className="producto-descripcion">
-                                            {producto.descripcion?.length > 80 
-                                                ? producto.descripcion.substring(0, 80) + '...'
-                                                : producto.descripcion}
+                                            {producto.descripcion?.length > 80 ? producto.descripcion.substring(0, 80) + '...' : producto.descripcion}
                                         </p>
                                         <div className="producto-detalles">
                                             <div className="detalle-item">
@@ -337,17 +311,11 @@ export function Productos() {
                                             </div>
                                         </div>
                                         <div className="producto-acciones">
-                                            <button 
-                                                className="btn-editar"
-                                                onClick={() => abrirModalEditar(producto)}
-                                            >
+                                            <button className="btn-editar" onClick={() => abrirModalEditar(producto)}>
                                                 <i className="bi bi-pencil"></i>
                                                 Modificar
                                             </button>
-                                            <button 
-                                                className="btn-eliminar"
-                                                onClick={() => handleEliminar(producto.id, producto.nombre)}
-                                            >
+                                            <button className="btn-eliminar" onClick={() => handleEliminar(producto.id, producto.nombre)}>
                                                 <i className="bi bi-trash"></i>
                                                 Eliminar
                                             </button>
@@ -377,13 +345,7 @@ export function Productos() {
                                         <div className="imagen-preview">
                                             <img src={imagenPreview} alt="Preview" />
                                         </div>
-                                        <input
-                                            type="file"
-                                            accept="image/*"
-                                            onChange={handleCambioImagen}
-                                            id="imagen-input"
-                                            style={{ display: 'none' }}
-                                        />
+                                        <input type="file" accept="image/*" onChange={handleCambioImagen} id="imagen-input" style={{ display: 'none' }} />
                                         <label htmlFor="imagen-input" className="btn-cambiar-imagen">
                                             <i className="bi bi-camera"></i>
                                             Cambiar Imagen
@@ -394,85 +356,45 @@ export function Productos() {
                                 <div className="form-row">
                                     <div className="form-group">
                                         <label>Nombre *</label>
-                                        <input
-                                            type="text"
-                                            name="nombre"
-                                            value={productoEditar.nombre}
-                                            onChange={handleCambioProducto}
-                                            required
-                                            maxLength={100}
-                                        />
+                                        <input type="text" name="nombre" value={productoEditar.nombre} onChange={handleCambioProducto}
+                                            required maxLength={100} />
                                     </div>
                                     <div className="form-group">
                                         <label>Precio *</label>
-                                        <input
-                                            type="number"
-                                            name="precio"
-                                            value={productoEditar.precio}
-                                            onChange={handleCambioProducto}
-                                            required
-                                            min="1"
-                                        />
+                                        <input type="number" name="precio" value={productoEditar.precio} onChange={handleCambioProducto}
+                                            required min="1" />
                                     </div>
                                 </div>
 
                                 <div className="form-group">
                                     <label>Descripción *</label>
-                                    <textarea
-                                        name="descripcion"
-                                        value={productoEditar.descripcion}
-                                        onChange={handleCambioProducto}
-                                        required
-                                        rows="3"
-                                        maxLength={500}
-                                    />
+                                    <textarea name="descripcion" value={productoEditar.descripcion} onChange={handleCambioProducto}
+                                        required rows="3" maxLength={500} />
                                     <small>{productoEditar.descripcion?.length || 0}/500</small>
                                 </div>
 
                                 <div className="form-row">
                                     <div className="form-group">
                                         <label>Stock *</label>
-                                        <input
-                                            type="number"
-                                            name="stock"
-                                            value={productoEditar.stock}
-                                            onChange={handleCambioProducto}
-                                            required
-                                            min="0"
-                                        />
+                                        <input type="number" name="stock" value={productoEditar.stock} onChange={handleCambioProducto}
+                                            required min="0" />
                                     </div>
                                     <div className="form-group">
                                         <label>Categoría *</label>
-                                        <select
-                                            name="categoria"
-                                            value={productoEditar.categoria}
-                                            onChange={handleCambioProducto}
-                                            required
-                                        >
+                                        <select name="categoria" value={productoEditar.categoria} onChange={handleCambioProducto} required>
                                             <option value="">Seleccionar...</option>
                                             {categorias.map(cat => (
-                                                <option key={cat.id} value={cat.id}>
-                                                    {cat.nombre}
-                                                </option>
+                                                <option key={cat.id} value={cat.id}>{cat.nombre}</option>
                                             ))}
                                         </select>
                                     </div>
                                 </div>
                             </div>
                             <div className="modal-footer">
-                                <button 
-                                    type="button" 
-                                    className="btn-cancelar"
-                                    onClick={cerrarModal}
-                                    disabled={guardandoProducto}
-                                >
+                                <button type="button" className="btn-cancelar" onClick={cerrarModal} disabled={guardandoProducto}>
                                     Cancelar
                                 </button>
-                                <button 
-                                    type="submit" 
-                                    className="btn-guardar"
-                                    disabled={guardandoProducto}
-                                >
+                                <button type="submit" className="btn-guardar" disabled={guardandoProducto}>
                                     {guardandoProducto ? (
                                         <>
                                             <span className="spinner-border spinner-border-sm me-2"></span>

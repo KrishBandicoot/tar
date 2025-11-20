@@ -1,0 +1,1 @@
+Primero, quiero que los stat de usuarios y productos en Admin.jsx muestren los numeros de productos y usuarios registrados.

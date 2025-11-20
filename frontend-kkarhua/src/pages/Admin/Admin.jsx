@@ -1,14 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { AdminNavbar } from '../../componentes/Navbar/AdminNavbar';
 import { Sidebar } from '../../componentes/Sidebar/Sidebar';
 import './Admin.css';
 
+const API_BASE_URL = 'http://localhost:8080/api';
+
 export function Admin() {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [stats, setStats] = useState({
+    totalProductos: 0,
+    productosActivos: 0,
+    totalUsuarios: 0,
+    usuariosActivos: 0,
+    loading: true,
+    error: null
+  });
 
   const handleLogout = () => {
     if (window.confirm('¿Estás seguro de que quieres cerrar sesión?')) {
@@ -53,30 +63,6 @@ export function Admin() {
       icon: 'bi-house',
       label: 'Inicio',
       path: '/'
-    }
-  ];
-
-  const stats = [
-    {
-      title: 'Compras',
-      value: '1.234',
-      subtitle: 'Probabilidad de aumento: 29%',
-      color: '#0d6efd',
-      icon: 'bi-cart-check'
-    },
-    {
-      title: 'Productos',
-      value: '400',
-      subtitle: 'Inventario actual: 500',
-      color: '#28a745',
-      icon: 'bi-box-seam'
-    },
-    {
-      title: 'Usuarios',
-      value: '890',
-      subtitle: 'Nuevos registros: 124',
-      color: '#ffc107',
-      icon: 'bi-people'
     }
   ];
 
@@ -131,6 +117,80 @@ export function Admin() {
     }
   ];
 
+  // Cargar estadísticas al montar el componente
+  useEffect(() => {
+    cargarEstadisticas();
+  }, []);
+
+  const cargarEstadisticas = async () => {
+    try {
+      setStats(prev => ({ ...prev, loading: true, error: null }));
+
+      const token = localStorage.getItem('accessToken');
+
+      // Cargar productos
+      const productosResponse = await fetch(`${API_BASE_URL}/productos`, {
+        headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+      });
+
+      // Cargar usuarios
+      const usuariosResponse = await fetch(`${API_BASE_URL}/usuarios`, {
+        headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+      });
+
+      if (!productosResponse.ok || !usuariosResponse.ok) {
+        throw new Error('Error al cargar estadísticas');
+      }
+
+      const productos = await productosResponse.json();
+      const usuarios = await usuariosResponse.json();
+
+      const productosActivos = productos.filter(p => p.estado === 'activo').length;
+      const usuariosActivos = usuarios.filter(u => u.estado === 'activo').length;
+
+      setStats({
+        totalProductos: productos.length,
+        productosActivos: productosActivos,
+        totalUsuarios: usuarios.length,
+        usuariosActivos: usuariosActivos,
+        loading: false,
+        error: null
+      });
+    } catch (error) {
+      console.error('Error al cargar estadísticas:', error);
+      setStats(prev => ({
+        ...prev,
+        loading: false,
+        error: 'Error al cargar las estadísticas'
+      }));
+    }
+  };
+
+  // Array de tarjetas de estadísticas dinámicas
+  const statsCards = [
+    {
+      title: 'Productos',
+      value: stats.totalProductos.toString(),
+      subtitle: `${stats.productosActivos} activos`,
+      color: '#28a745',
+      icon: 'bi-box-seam'
+    },
+    {
+      title: 'Usuarios',
+      value: stats.totalUsuarios.toString(),
+      subtitle: `${stats.usuariosActivos} activos`,
+      color: '#ffc107',
+      icon: 'bi-people'
+    },
+    {
+      title: 'Órdenes',
+      value: '0',
+      subtitle: 'Pendientes de procesar',
+      color: '#0d6efd',
+      icon: 'bi-cart-check'
+    }
+  ];
+
   return (
     <>
       <AdminNavbar />
@@ -155,20 +215,39 @@ export function Admin() {
 
           {/* Stats Cards */}
           <div className="stats-container">
-            {stats.map((stat, idx) => (
-              <div key={idx} className="stat-card" style={{ borderLeftColor: stat.color }}>
-                <div className="stat-content">
-                  <div>
-                    <p className="stat-title">{stat.title}</p>
-                    <h2 className="stat-value" style={{ color: stat.color }}>
-                      {stat.value}
-                    </h2>
-                    <p className="stat-subtitle">{stat.subtitle}</p>
-                  </div>
-                  <i className={`bi ${stat.icon}`} style={{ color: stat.color }}></i>
+            {stats.loading ? (
+              <div style={{ textAlign: 'center', gridColumn: '1 / -1', padding: '40px 0' }}>
+                <div className="spinner-border text-primary" role="status">
+                  <span className="visually-hidden">Cargando...</span>
                 </div>
+                <p className="mt-3">Cargando estadísticas...</p>
               </div>
-            ))}
+            ) : stats.error ? (
+              <div style={{ gridColumn: '1 / -1' }} className="alert alert-danger">
+                {stats.error}
+                <button 
+                  className="btn btn-sm btn-primary ms-2"
+                  onClick={cargarEstadisticas}
+                >
+                  Reintentar
+                </button>
+              </div>
+            ) : (
+              statsCards.map((stat, idx) => (
+                <div key={idx} className="stat-card" style={{ borderLeftColor: stat.color }}>
+                  <div className="stat-content">
+                    <div>
+                      <p className="stat-title">{stat.title}</p>
+                      <h2 className="stat-value" style={{ color: stat.color }}>
+                        {stat.value}
+                      </h2>
+                      <p className="stat-subtitle">{stat.subtitle}</p>
+                    </div>
+                    <i className={`bi ${stat.icon}`} style={{ color: stat.color }}></i>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
 
           {/* Quick Menu */}
