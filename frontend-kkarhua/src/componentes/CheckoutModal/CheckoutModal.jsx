@@ -4,9 +4,54 @@ import './CheckoutModal.css';
 
 const API_BASE_URL = 'http://localhost:8080/api';
 
+// Objeto con regiones y sus comunas
+const regionesComunas = {
+  "Región Metropolitana de Santiago": [
+    "Cerrillos", "Cerro Navia", "Conchalí", "El Bosque", "Estación Central",
+    "Huechuraba", "Independencia", "La Cisterna", "La Florida", "La Granja",
+    "La Pintana", "La Reina", "Las Condes", "Lo Barnechea", "Lo Espejo",
+    "Lo Prado", "Macul", "Maipú", "Ñuñoa", "Pedro Aguirre Cerda",
+    "Peñalolén", "Providencia", "Pudahuel", "Quilicura", "Quinta Normal",
+    "Recoleta", "Renca", "San Joaquín", "San Miguel", "San Ramón",
+    "Santiago", "Vitacura", "Puente Alto", "Pirque", "San José de Maipo",
+    "Colina", "Lampa", "Tiltil", "San Bernardo", "Buin", "Calera de Tango",
+    "Paine", "Melipilla", "Alhué", "Curacaví", "María Pinto", "San Pedro",
+    "Talagante", "El Monte", "Isla de Maipo", "Padre Hurtado", "Peñaflor"
+  ],
+  "Región de Valparaíso": [
+    "Valparaíso", "Casablanca", "Concón", "Juan Fernández", "Puchuncaví",
+    "Quintero", "Viña del Mar", "Isla de Pascua", "Los Andes", "Calle Larga",
+    "Rinconada", "San Esteban", "La Ligua", "Cabildo", "Papudo", "Petorca",
+    "Zapallar", "Quillota", "Calera", "Hijuelas", "La Cruz", "Nogales",
+    "San Antonio", "Algarrobo", "Cartagena", "El Quisco", "El Tabo",
+    "Santo Domingo", "San Felipe", "Catemu", "Llaillay", "Panquehue",
+    "Putaendo", "Santa María", "Quilpué", "Limache", "Olmué", "Villa Alemana"
+  ],
+  "Región de Bío-Bío": [
+    "Concepción", "Coronel", "Chiguayante", "Florida", "Hualqui", "Lota",
+    "Penco", "San Pedro de la Paz", "Santa Juana", "Talcahuano", "Tomé",
+    "Hualpén", "Lebu", "Arauco", "Cañete", "Contulmo", "Curanilahue",
+    "Los Álamos", "Tirúa", "Los Ángeles", "Antuco", "Cabrero", "Laja",
+    "Mulchén", "Nacimiento", "Negrete", "Quilaco", "Quilleco", "San Rosendo",
+    "Santa Bárbara", "Tucapel", "Yumbel", "Alto Biobío"
+  ],
+  "Región del Maule": [
+    "Talca", "Constitución", "Curepto", "Empedrado", "Maule", "Pelarco",
+    "Pencahue", "Río Claro", "San Clemente", "San Rafael", "Cauquenes",
+    "Chanco", "Pelluhue", "Curicó", "Hualañé", "Licantén", "Molina",
+    "Rauco", "Romeral", "Sagrada Familia", "Teno", "Vichuquén", "Linares",
+    "Colbún", "Longaví", "Parral", "Retiro", "San Javier", "Villa Alegre",
+    "Yerbas Buenas"
+  ],
+  "Región de Antofagasta": [
+    "Antofagasta", "Mejillones", "Sierra Gorda", "Taltal", "Calama",
+    "Ollagüe", "San Pedro de Atacama", "Tocopilla", "María Elena"
+  ]
+};
+
 export function CheckoutModal({ isOpen, onClose, total, items }) {
   const { user } = useAuth();
-  const [step, setStep] = useState(1); // 1: Info Cliente, 2: Dirección
+  const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [envios, setEnvios] = useState([]);
   const [selectedEnvio, setSelectedEnvio] = useState(null);
@@ -19,11 +64,25 @@ export function CheckoutModal({ isOpen, onClose, total, items }) {
     calle: '',
     departamento: '',
     region: 'Región Metropolitana de Santiago',
-    comuna: 'Cerrillos',
+    comuna: '',
     indicaciones: ''
   });
 
   const [errors, setErrors] = useState({});
+  const [comunasDisponibles, setComunasDisponibles] = useState([]);
+
+  // Actualizar comunas disponibles cuando cambia la región
+  useEffect(() => {
+    if (formData.region) {
+      const comunas = regionesComunas[formData.region] || [];
+      setComunasDisponibles(comunas);
+      
+      // Resetear comuna si no está en la lista de la nueva región
+      if (!comunas.includes(formData.comuna)) {
+        setFormData(prev => ({ ...prev, comuna: '' }));
+      }
+    }
+  }, [formData.region]);
 
   // Cargar datos del usuario si está logeado
   useEffect(() => {
@@ -145,7 +204,6 @@ export function CheckoutModal({ isOpen, onClose, total, items }) {
 
       let envioId = selectedEnvio;
 
-      // Si es una nueva dirección, guardarla primero
       if (showNewAddressForm) {
         console.log('📍 Creando nueva dirección...');
         
@@ -180,7 +238,6 @@ export function CheckoutModal({ isOpen, onClose, total, items }) {
         envioId = envioCreado.id;
       }
 
-      // Aquí va la lógica de pago/confirmación
       const ordersData = {
         cliente: {
           nombre: formData.nombre.trim(),
@@ -196,7 +253,6 @@ export function CheckoutModal({ isOpen, onClose, total, items }) {
 
       alert(`✅ Pedido procesado correctamente\n\nTotal: $${total.toLocaleString('es-CL')}\nEnvío guardado: ${envioId}`);
       
-      // Limpiar y cerrar
       setStep(1);
       setFormData({
         nombre: '',
@@ -205,12 +261,10 @@ export function CheckoutModal({ isOpen, onClose, total, items }) {
         calle: '',
         departamento: '',
         region: 'Región Metropolitana de Santiago',
-        comuna: 'Cerrillos',
+        comuna: '',
         indicaciones: ''
       });
       onClose();
-      
-      // Aquí iría redirección a confirmación o pago
 
     } catch (error) {
       console.error('❌ Error al procesar pago:', error);
@@ -230,7 +284,6 @@ export function CheckoutModal({ isOpen, onClose, total, items }) {
           <i className="bi bi-x-lg"></i>
         </button>
 
-        {/* Step 1: Información del Cliente */}
         {step === 1 && (
           <>
             <div className="checkout-header">
@@ -301,7 +354,6 @@ export function CheckoutModal({ isOpen, onClose, total, items }) {
           </>
         )}
 
-        {/* Step 2: Dirección de Entrega */}
         {step === 2 && (
           <>
             <div className="checkout-header">
@@ -310,7 +362,6 @@ export function CheckoutModal({ isOpen, onClose, total, items }) {
             </div>
 
             <form className="checkout-form">
-              {/* Mostrar envíos guardados si existen y no está en form de nueva dirección */}
               {envios.length > 0 && !showNewAddressForm && (
                 <div className="envios-section">
                   <h3 className="section-title">Mis direcciones guardadas</h3>
@@ -352,7 +403,6 @@ export function CheckoutModal({ isOpen, onClose, total, items }) {
                 </div>
               )}
 
-              {/* Formulario de nueva dirección */}
               {showNewAddressForm && (
                 <div className="new-address-form">
                   <div className="form-row">
@@ -393,11 +443,11 @@ export function CheckoutModal({ isOpen, onClose, total, items }) {
                         onChange={handleInputChange}
                         className={errors.region ? 'is-invalid' : ''}
                       >
-                        <option>Región Metropolitana de Santiago</option>
-                        <option>Región de Valparaíso</option>
-                        <option>Región de Bío-Bío</option>
-                        <option>Región del Maule</option>
-                        <option>Región de Antofagasta</option>
+                        {Object.keys(regionesComunas).map((region) => (
+                          <option key={region} value={region}>
+                            {region}
+                          </option>
+                        ))}
                       </select>
                       {errors.region && <span className="error-text">{errors.region}</span>}
                     </div>
@@ -410,14 +460,14 @@ export function CheckoutModal({ isOpen, onClose, total, items }) {
                         value={formData.comuna}
                         onChange={handleInputChange}
                         className={errors.comuna ? 'is-invalid' : ''}
+                        disabled={comunasDisponibles.length === 0}
                       >
-                        <option>Cerrillos</option>
-                        <option>Santiago</option>
-                        <option>Providencia</option>
-                        <option>Las Condes</option>
-                        <option>Ñuñoa</option>
-                        <option>Macul</option>
-                        <option>La Florida</option>
+                        <option value="">Seleccionar comuna...</option>
+                        {comunasDisponibles.map((comuna) => (
+                          <option key={comuna} value={comuna}>
+                            {comuna}
+                          </option>
+                        ))}
                       </select>
                       {errors.comuna && <span className="error-text">{errors.comuna}</span>}
                     </div>

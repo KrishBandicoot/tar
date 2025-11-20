@@ -20,13 +20,13 @@
   border-radius: 12px;
   width: 90%;
   max-width: 650px;
+  max-height: 85vh;
   display: flex;
   flex-direction: column;
   position: relative;
   animation: slideIn 0.3s ease-out;
-  max-height: 90vh;
-  overflow-y: auto;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
 }
 
 @keyframes slideIn {
@@ -88,6 +88,26 @@
   padding: 20px 30px;
   flex: 1;
   overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* Scrollbar personalizado para el contenido del modal */
+.checkout-form::-webkit-scrollbar {
+  width: 6px;
+}
+
+.checkout-form::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.checkout-form::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 10px;
+}
+
+.checkout-form::-webkit-scrollbar-thumb:hover {
+  background: #555;
 }
 
 .form-group {
@@ -126,6 +146,7 @@
   font-family: inherit;
   transition: all 0.3s;
   background: white;
+  color: #212529;
 }
 
 .form-group input::placeholder,
@@ -149,6 +170,28 @@
 .form-group textarea {
   resize: vertical;
   min-height: 100px;
+}
+
+/* Asegurar que el texto de los selects sea visible */
+.form-group select {
+  color: #212529 !important;
+  background-color: white !important;
+  appearance: auto;
+  -webkit-appearance: menulist;
+  -moz-appearance: menulist;
+}
+
+.form-group select option {
+  color: #212529 !important;
+  background-color: white !important;
+  padding: 8px;
+}
+
+.form-group select:disabled {
+  background-color: #e9ecef !important;
+  color: #6c757d !important;
+  cursor: not-allowed;
+  opacity: 0.7;
 }
 
 .error-text {
@@ -375,7 +418,8 @@
 /* ==================== RESPONSIVE ==================== */
 @media (max-width: 768px) {
   .checkout-modal {
-    max-width: 95%;
+    max-width: 90%;
+    max-height: 90vh;
   }
 
   .checkout-header {
@@ -409,10 +453,12 @@
 @media (max-width: 480px) {
   .checkout-overlay {
     padding: 10px;
+    align-items: center;
   }
 
   .checkout-modal {
-    max-height: 95vh;
+    max-height: 90vh;
+    width: 95%;
   }
 
   .checkout-header {
