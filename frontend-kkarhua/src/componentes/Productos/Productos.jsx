@@ -14,7 +14,6 @@ export function Productos() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    // Estados para el modal de edición
     const [modalAbierto, setModalAbierto] = useState(false);
     const [productoEditar, setProductoEditar] = useState(null);
     const [categorias, setCategorias] = useState([]);
@@ -35,7 +34,6 @@ export function Productos() {
     }, []);
 
     useEffect(() => {
-        // Filtrar productos según búsqueda
         if (busqueda.trim() === '') {
             setProductosFiltrados(productos);
         } else {
@@ -154,7 +152,6 @@ export function Productos() {
         setGuardandoProducto(true);
 
         try {
-            // Actualizar datos del producto
             const productoActualizado = {
                 nombre: productoEditar.nombre,
                 descripcion: productoEditar.descripcion,
@@ -167,13 +164,17 @@ export function Productos() {
 
             const response = await fetch(`${API_BASE_URL}/productos/${productoEditar.id}`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json'
+                },
                 body: JSON.stringify(productoActualizado)
             });
 
-            if (!response.ok) throw new Error('Error al actualizar producto');
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.message || 'Error al actualizar producto');
+            }
 
-            // Si hay nueva imagen, subirla
             if (archivoImagen) {
                 const formData = new FormData();
                 formData.append('file', archivoImagen);
@@ -183,14 +184,15 @@ export function Productos() {
                     body: formData
                 });
 
-                if (!imgResponse.ok) throw new Error('Error al subir imagen');
+                if (!imgResponse.ok) {
+                    alert('Producto actualizado, pero hubo un error al subir la imagen');
+                }
             }
 
-            alert('Producto actualizado exitosamente');
+            alert('✅ Producto actualizado exitosamente');
             cerrarModal();
             cargarProductos();
         } catch (error) {
-            console.error('Error:', error);
             alert('Error al guardar cambios: ' + error.message);
         } finally {
             setGuardandoProducto(false);
@@ -209,7 +211,6 @@ export function Productos() {
                         <h1 className="page-title">Gestión de Productos</h1>
                     </div>
 
-                    {/* Buscador */}
                     <div className="search-bar">
                         <div className="search-input-wrapper">
                             <i className="bi bi-search search-icon"></i>
@@ -234,7 +235,6 @@ export function Productos() {
                         </div>
                     </div>
 
-                    {/* Contenido */}
                     {loading ? (
                         <div className="loading-container">
                             <div className="spinner-border text-primary" role="status">
@@ -315,7 +315,6 @@ export function Productos() {
                 </main>
             </div>
 
-            {/* Modal de Edición */}
             {modalAbierto && (
                 <div className="modal-overlay" onClick={cerrarModal}>
                     <div className="modal-content" onClick={(e) => e.stopPropagation()}>
@@ -327,7 +326,6 @@ export function Productos() {
                         </div>
                         <form onSubmit={handleGuardarProducto}>
                             <div className="modal-body">
-                                {/* Imagen */}
                                 <div className="form-group">
                                     <label>Imagen del Producto</label>
                                     <div className="imagen-upload">
@@ -380,7 +378,7 @@ export function Productos() {
                                         value={productoEditar.descripcion}
                                         onChange={handleCambioProducto}
                                         required
-                                        rows="4"
+                                        rows="3"
                                         maxLength={500}
                                     />
                                     <small>{productoEditar.descripcion?.length || 0}/500</small>
@@ -414,19 +412,6 @@ export function Productos() {
                                             ))}
                                         </select>
                                     </div>
-                                </div>
-
-                                <div className="form-group">
-                                    <label>Estado *</label>
-                                    <select
-                                        name="estado"
-                                        value={productoEditar.estado}
-                                        onChange={handleCambioProducto}
-                                        required
-                                    >
-                                        <option value="activo">Activo</option>
-                                        <option value="inactivo">Inactivo</option>
-                                    </select>
                                 </div>
                             </div>
                             <div className="modal-footer">
