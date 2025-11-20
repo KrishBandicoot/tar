@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { AdminNavbar } from '../../componentes/Navbar/AdminNavbar';
+import { Sidebar } from '../../componentes/Sidebar/Sidebar';
 import './Admin.css';
 
 export function Admin() {
@@ -21,8 +22,7 @@ export function Admin() {
     {
       icon: 'bi-speedometer2',
       label: 'Dashboard',
-      path: '/admin',
-      active: true
+      path: '/admin'
     },
     {
       icon: 'bi-box-seam',
@@ -115,30 +115,7 @@ export function Admin() {
 
       <div className="admin-wrapper">
         {/* Sidebar */}
-        <aside className={`admin-sidebar ${sidebarOpen ? 'open' : 'collapsed'}`}>
-          <div className="sidebar-header">
-            <button
-              className="sidebar-toggle"
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-            >
-              <i className={`bi bi-${sidebarOpen ? 'chevron-left' : 'chevron-right'}`}></i>
-            </button>
-            {sidebarOpen && <h3 className="sidebar-brand">Kkarhua</h3>}
-          </div>
-
-          <nav className="sidebar-nav">
-            {menuItems.map((item, idx) => (
-              <div
-                key={idx}
-                className={`nav-item ${item.active ? 'active' : ''}`}
-                onClick={() => navigate(item.path)}
-              >
-                <i className={`bi ${item.icon}`}></i>
-                {sidebarOpen && <span>{item.label}</span>}
-              </div>
-            ))}
-          </nav>
-        </aside>
+        <Sidebar menuItems={menuItems} currentPath="/admin" />
 
         {/* Main Content */}
         <main className={`admin-main ${sidebarOpen ? 'sidebar-open' : 'sidebar-collapsed'}`}>

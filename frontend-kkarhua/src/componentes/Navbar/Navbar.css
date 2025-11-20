@@ -1,0 +1,11 @@
+/* Navbar siempre visible - sin animaciones de scroll */
+.navbar {
+    margin: 0 !important;
+}
+
+/* Asegurar que el navbar se vea correctamente en móviles */
+@media (max-width: 768px) {
+    .navbar {
+        padding: 0.5rem 1rem;
+    }
+}

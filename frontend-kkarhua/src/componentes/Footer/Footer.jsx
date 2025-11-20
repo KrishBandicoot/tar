@@ -1,7 +1,7 @@
 export function Footer() {
     return (
-        <footer className="footer-component">
-            <div className="container-fluid bg-dark text-white py-4">
+        <footer className="footer-component" style={{ width: '100vw', marginLeft: 'calc(-50vw + 50%)', marginRight: 'calc(-50vw + 50%)' }}>
+            <div className="bg-dark text-white py-4">
                 <div className="container">
                     <div className="row">
                         <div className="col-md-4 mb-3 mb-md-0">
