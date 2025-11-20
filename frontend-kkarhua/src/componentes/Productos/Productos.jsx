@@ -105,7 +105,8 @@ export function Productos() {
     const abrirModalEditar = (producto) => {
         setProductoEditar({
             ...producto,
-            categoria: producto.categoria?.id || ''
+            categoria: producto.categoria?.id || '',
+            stock: producto.stock || 0
         });
         setImagenPreview(getImageUrl(producto.imagen));
         setArchivoImagen(null);
@@ -152,16 +153,16 @@ export function Productos() {
         setGuardandoProducto(true);
 
         try {
+            // Objeto con solo los campos editables (SIN stock ni estado)
             const productoActualizado = {
                 nombre: productoEditar.nombre,
                 descripcion: productoEditar.descripcion,
                 precio: parseFloat(productoEditar.precio),
-                stock: parseInt(productoEditar.stock),
                 categoria: { id: parseInt(productoEditar.categoria) },
-                estado: productoEditar.estado,
                 imagen: productoEditar.imagen
             };
 
+            // 1. Actualizar datos del producto
             const response = await fetch(`${API_BASE_URL}/productos/${productoEditar.id}`, {
                 method: 'PUT',
                 headers: { 
@@ -175,6 +176,22 @@ export function Productos() {
                 throw new Error(errorData.message || 'Error al actualizar producto');
             }
 
+            // 2. Actualizar stock SOLO SI cambió (a través del StockController)
+            if (productoEditar.stock !== undefined && productoEditar.stock !== null) {
+                const stockResponse = await fetch(`${API_BASE_URL}/stock/${productoEditar.id}/actualizar`, {
+                    method: 'PATCH',
+                    headers: { 
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ stock: parseInt(productoEditar.stock) })
+                });
+
+                if (!stockResponse.ok) {
+                    console.warn('⚠️ Stock no se pudo actualizar, pero el producto sí');
+                }
+            }
+
+            // 3. Subir imagen si cambió
             if (archivoImagen) {
                 const formData = new FormData();
                 formData.append('file', archivoImagen);
@@ -266,9 +283,6 @@ export function Productos() {
                                                 e.target.src = 'https://via.placeholder.com/300x200?text=Sin+Imagen';
                                             }}
                                         />
-                                        <span className={`estado-badge ${producto.estado === 'activo' ? 'activo' : 'inactivo'}`}>
-                                            {producto.estado}
-                                        </span>
                                     </div>
                                     <div className="producto-info">
                                         <h3 className="producto-nombre">{producto.nombre}</h3>

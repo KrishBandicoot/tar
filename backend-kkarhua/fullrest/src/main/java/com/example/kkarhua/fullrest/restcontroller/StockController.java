@@ -76,7 +76,7 @@ public class StockController {
         int stockAnterior = producto.getStock();
         producto.setStock(nuevoStock);
         
-        // Cambiar estado si se agota
+        // Solo cambiar estado basado en stock
         if (nuevoStock == 0) {
             producto.setEstado("agotado");
         } else if (stockAnterior == 0 && nuevoStock > 0) {
