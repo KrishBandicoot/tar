@@ -5,7 +5,6 @@
 
   color-scheme: light dark;
   color: rgba(255, 255, 255, 0.87);
-  /*background-color: #242424;*/
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -21,15 +20,6 @@ a {
 a:hover {
   color: #535bf2;
 }
-
-/*
-body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
-}*/
 
 h1 {
   font-size: 3.2em;
@@ -69,13 +59,13 @@ button:focus-visible {
 }
 
 body {
-  padding-top: 70px; /* Altura aproximada del navbar */
+  padding-top: 70px; /* Ajustado para navbar más grande */
   margin: 0;
 }
 
-/* Ajustar en dispositivos móviles si es necesario */
+/* Ajustar en dispositivos móviles */
 @media (max-width: 768px) {
   body {
-    padding-top: 60px;
+    padding-top: 65px;
   }
 }

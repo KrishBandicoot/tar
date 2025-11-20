@@ -54,6 +54,7 @@ export function Admin() {
       label: 'Crear Usuario',
       path: '/crear-usuario'
     },
+    { icon: 'bi-tag', label: 'Categorías', path: '/categorias' },
     {
       icon: 'bi-shop',
       label: 'Ver Tienda',

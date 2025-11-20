@@ -1,10 +1,21 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useCarrito } from '../../context/CarritoContext';
 import './Navbar.css';
 
 export function Navbar() {
+    const navigate = useNavigate();
     const { obtenerCantidadTotal } = useCarrito();
     const cantidadItems = obtenerCantidadTotal();
+
+    const handleCarritoClick = () => {
+        navigate('/carrito');
+        // Cerrar el menú hamburguesa si está abierto
+        const navbarToggler = document.querySelector('.navbar-toggler');
+        const navbarCollapse = document.querySelector('.navbar-collapse');
+        if (navbarCollapse && navbarCollapse.classList.contains('show')) {
+            navbarToggler?.click();
+        }
+    };
 
     return (
         <nav className="navbar navbar-expand-sm bg-dark navbar-dark" 
@@ -30,14 +41,23 @@ export function Navbar() {
                             <Link className="nav-link" to="/contacto">Contacto</Link> 
                         </li>
                         <li className="nav-item">
-                            <Link className="nav-link position-relative" to="/carrito">
+                            <button 
+                                className="nav-link position-relative"
+                                onClick={handleCarritoClick}
+                                style={{ 
+                                    background: 'none', 
+                                    border: 'none',
+                                    cursor: 'pointer',
+                                    color: 'inherit'
+                                }}
+                            >
                                 <i className="bi bi-cart3"></i>
                                 {cantidadItems > 0 && (
                                     <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
                                         {cantidadItems}
                                     </span>
                                 )}
-                            </Link>
+                            </button>
                         </li> 
                     </ul>
                 </div>                

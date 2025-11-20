@@ -25,6 +25,7 @@ export function Usuarios() {
         { icon: 'bi-plus-circle', label: 'Crear Producto', path: '/crear-producto' },
         { icon: 'bi-people', label: 'Usuarios', path: '/usuarios' },
         { icon: 'bi-person-plus', label: 'Crear Usuario', path: '/crear-usuario' },
+        
         { icon: 'bi-shop', label: 'Ver Tienda', path: '/lista-productos' },
         { icon: 'bi-house', label: 'Inicio', path: '/' }
     ];

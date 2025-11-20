@@ -14,6 +14,7 @@ import { EditarProd } from './componentes/EditarProd/EditarProd';
 import { Productos } from './componentes/Productos/Productos';
 import { Usuarios } from './pages/Usuarios/Usuarios';
 import { CrearUsuario } from './pages/CrearUsuario/CrearUsuario';
+import { Categorias } from './pages/Categorias/Categorias';
 import './App.css'  
 
 function App() {
@@ -42,6 +43,8 @@ function App() {
               {/* Rutas de administración de usuarios */}
               <Route path="/usuarios" element={<Usuarios />} />
               <Route path="/crear-usuario" element={<CrearUsuario />} />
+              <Route path="/categorias" element={<Categorias />} />
+
            </Routes>
         </Router>
       </CarritoProvider>
