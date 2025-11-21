@@ -1,6 +1,0 @@
-{
-     "nombre": "Cristian Lizama Ordenez",
-     "email": "cristian.lizama.diaz2014@gmail.com",
-     "contrasena": "Dichato2021",
-     "rol": "super-admin"
-}

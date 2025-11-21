@@ -1,0 +1,6 @@
+{
+     "nombre": "Sofia Troncoso",
+     "email": "Sofia@gmail.com",
+     "contrasena": "Dichato2014",
+     "rol": "super-admin"
+}

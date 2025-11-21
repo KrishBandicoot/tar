@@ -215,10 +215,3 @@ jobs:
       - uses: codecov/codecov-action@v3
 ```
 
-## ✨ Próximos Pasos
-
-- [ ] Agregar tests para más componentes
-- [ ] Implementar tests E2E con Playwright/Cypress
-- [ ] Configurar CI/CD pipeline
-- [ ] Aumentar cobertura a 80%+
-- [ ] Agregar tests de accesibilidad
