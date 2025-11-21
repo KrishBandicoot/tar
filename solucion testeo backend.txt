@@ -1,0 +1,4 @@
+abre powershell
+
+netstat -ano | findstr :56837
+taskkill /PID numero que apareció en el atenrior /F 

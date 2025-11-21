@@ -2,13 +2,24 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { BrowserRouter } from 'react-router-dom'
+import { MemoryRouter } from 'react-router-dom'
 import { Navbar } from './Navbar'
 import { CarritoProvider } from '../../context/CarritoContext'
+
+// Mock de useNavigate
+const mockNavigate = vi.fn()
+vi.mock('react-router-dom', async () => {
+  const actual = await vi.importActual('react-router-dom')
+  return {
+    ...actual,
+    useNavigate: () => mockNavigate
+  }
+})
 
 describe('Navbar', () => {
   beforeEach(() => {
     localStorage.clear()
+    mockNavigate.mockClear()
   })
 
   it('debe renderizar todos los enlaces de navegación', () => {
@@ -27,8 +38,6 @@ describe('Navbar', () => {
   })
 
   it('debe mostrar el badge del carrito con la cantidad correcta', async () => {
-    const user = userEvent.setup()
-    
     // Configurar carrito con 3 items en localStorage
     localStorage.setItem(
       'carrito',
@@ -79,8 +88,10 @@ describe('Navbar', () => {
       </MemoryRouter>
     )
 
-    // Buscar el botón del carrito (tiene un ícono bi-cart3)
-    const carritoButton = screen.getByRole('button', { name: /carrito/i })
+    // Buscar todos los botones y filtrar el que tiene el ícono del carrito
+    const buttons = screen.getAllByRole('button')
+    const carritoButton = buttons.find(btn => btn.querySelector('.bi-cart3'))
+    
     expect(carritoButton).toBeInTheDocument()
 
     await user.click(carritoButton)
@@ -112,9 +123,6 @@ describe('Navbar', () => {
   it('debe cerrar el menú hamburguesa al hacer clic en el carrito', async () => {
     const user = userEvent.setup()
     
-    // Renderizar en viewport móvil
-    global.innerWidth = 500
-    
     render(
       <MemoryRouter>
         <CarritoProvider>
@@ -127,7 +135,12 @@ describe('Navbar', () => {
     const navbarCollapse = document.querySelector('.navbar-collapse')
     navbarCollapse?.classList.add('show')
 
-    const carritoButton = screen.getByRole('button', { name: /carrito/i })
+    // Buscar el botón del carrito específicamente (igual que el test anterior)
+    const buttons = screen.getAllByRole('button')
+    const carritoButton = buttons.find(btn => btn.querySelector('.bi-cart3'))
+    
+    expect(carritoButton).toBeInTheDocument()
+    
     await user.click(carritoButton)
 
     // El código debería cerrar el menú (este test verifica que no crashee)
