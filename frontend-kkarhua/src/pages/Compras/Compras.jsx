@@ -1,4 +1,3 @@
-// src/pages/Compras/Compras.jsx
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AdminNavbar } from '../../componentes/Navbar/AdminNavbar';
@@ -52,23 +51,38 @@ export function Compras() {
         try {
             setLoading(true);
             const token = localStorage.getItem('accessToken');
+            
+            console.log('🔄 Intentando cargar compras...');
+            console.log('📍 URL:', `${API_BASE_URL}/compras`);
+            console.log('🔐 Token disponible:', !!token);
+
             const response = await fetch(`${API_BASE_URL}/compras`, {
                 headers: {
-                    'Authorization': `Bearer ${token}`
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
                 }
             });
-            if (!response.ok) throw new Error('Error al cargar compras');
+
+            console.log('📊 Response status:', response.status);
+
+            if (!response.ok) {
+                console.error('❌ Error en respuesta:', response.statusText);
+                throw new Error(`Error ${response.status}: ${response.statusText}`);
+            }
+
             const data = await response.json();
-            // Ordenar por fecha más reciente primero
+            console.log('✅ Compras cargadas:', data.length, 'registros');
+
             const comprasOrdenadas = data.sort((a, b) => 
                 new Date(b.fechaCompra) - new Date(a.fechaCompra)
             );
+            
             setCompras(comprasOrdenadas);
             setComprasFiltradas(comprasOrdenadas);
             setError(null);
         } catch (error) {
-            console.error('Error:', error);
-            setError('No se pudieron cargar las compras');
+            console.error('❌ Error completo:', error);
+            setError(`No se pudieron cargar las compras: ${error.message}`);
         } finally {
             setLoading(false);
         }
@@ -165,7 +179,13 @@ export function Compras() {
                             <p className="mt-3">Cargando compras...</p>
                         </div>
                     ) : error ? (
-                        <div className="alert alert-danger">{error}</div>
+                        <div className="alert alert-danger">
+                            <i className="bi bi-exclamation-triangle me-2"></i>
+                            {error}
+                            <button className="btn btn-sm btn-primary ms-2" onClick={cargarCompras}>
+                                Reintentar
+                            </button>
+                        </div>
                     ) : comprasFiltradas.length === 0 ? (
                         <div className="empty-state">
                             <i className="bi bi-cart-x empty-icon"></i>

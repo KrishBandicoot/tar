@@ -79,7 +79,6 @@ export function Admin() {
   ];
 
   const quickMenus = [
-
     {
       icon: 'bi-cart-check', 
       title: 'Compras', 
@@ -130,7 +129,6 @@ export function Admin() {
     }
   ];
 
-  // Cargar estadísticas al montar el componente
   useEffect(() => {
     cargarEstadisticas();
   }, []);
@@ -140,33 +138,59 @@ export function Admin() {
       setStats(prev => ({ ...prev, loading: true, error: null }));
 
       const token = localStorage.getItem('accessToken');
+      const headers = token 
+        ? { 'Authorization': `Bearer ${token}` } 
+        : {};
+
+      console.log('🔄 Cargando estadísticas...');
 
       // Cargar productos
+      console.log('📦 Cargando productos...');
       const productosResponse = await fetch(`${API_BASE_URL}/productos`, {
-        headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+        headers
       });
 
       // Cargar usuarios
+      console.log('👥 Cargando usuarios...');
       const usuariosResponse = await fetch(`${API_BASE_URL}/usuarios`, {
-        headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+        headers
       });
 
-      // Cargar compras (REEMPLAZADO: antes era envíos)
-      const comprasResponse = await fetch(`${API_BASE_URL}/compras/stats/totales`, {
-        headers: token ? { 'Authorization': `Bearer ${token}` } : {}
-      });
+      // Cargar compras
+      console.log('🛒 Cargando compras...');
+      let totalCompras = 0;
+      try {
+        const comprasResponse = await fetch(`${API_BASE_URL}/compras`, {
+          headers
+        });
+        
+        if (comprasResponse.ok) {
+          const comprasData = await comprasResponse.json();
+          totalCompras = Array.isArray(comprasData) ? comprasData.length : 0;
+          console.log('✅ Compras cargadas:', totalCompras);
+        } else {
+          console.warn('⚠️ Error al cargar compras:', comprasResponse.status);
+        }
+      } catch (err) {
+        console.warn('⚠️ No se pudieron cargar las compras:', err.message);
+      }
 
-      if (!productosResponse.ok || !usuariosResponse.ok || !comprasResponse.ok) {
-        throw new Error('Error al cargar estadísticas');
+      if (!productosResponse.ok) {
+        throw new Error(`Error al cargar productos: ${productosResponse.status}`);
+      }
+
+      if (!usuariosResponse.ok) {
+        throw new Error(`Error al cargar usuarios: ${usuariosResponse.status}`);
       }
 
       const productos = await productosResponse.json();
       const usuarios = await usuariosResponse.json();
-      const comprasStats = await comprasResponse.json();
+
+      console.log('✅ Productos cargados:', productos.length);
+      console.log('✅ Usuarios cargados:', usuarios.length);
 
       const productosActivos = productos.filter(p => p.estado === 'activo').length;
       const usuariosActivos = usuarios.filter(u => u.estado === 'activo').length;
-      const totalCompras = comprasStats.totalCompras;
 
       setStats({
         totalProductos: productos.length,
@@ -177,17 +201,17 @@ export function Admin() {
         loading: false,
         error: null
       });
+
     } catch (error) {
-      console.error('Error al cargar estadísticas:', error);
+      console.error('❌ Error al cargar estadísticas:', error);
       setStats(prev => ({
         ...prev,
         loading: false,
-        error: 'Error al cargar las estadísticas'
+        error: `Error: ${error.message}`
       }));
     }
   };
 
-  // Array de tarjetas de estadísticas dinámicas (ACTUALIZADO)
   const statsCards = [
     {
       title: 'Productos',
@@ -217,10 +241,8 @@ export function Admin() {
       <AdminNavbar />
 
       <div className="admin-wrapper">
-        {/* Sidebar */}
         <Sidebar menuItems={menuItems} currentPath="/admin" />
 
-        {/* Main Content */}
         <main className={`admin-main ${sidebarOpen ? 'sidebar-open' : 'sidebar-collapsed'}`}>
           {/* Header */}
           <div className="admin-header">

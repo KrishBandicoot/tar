@@ -52,19 +52,34 @@ export function Usuarios() {
         try {
             setLoading(true);
             const token = localStorage.getItem('accessToken');
+            
+            console.log('🔄 Cargando usuarios...');
+            console.log('📍 URL:', `${API_BASE_URL}/usuarios`);
+            console.log('🔐 Token disponible:', !!token);
+
             const response = await fetch(`${API_BASE_URL}/usuarios`, {
                 headers: {
-                    'Authorization': `Bearer ${token}`
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
                 }
             });
-            if (!response.ok) throw new Error('Error al cargar usuarios');
+
+            console.log('📊 Response status:', response.status);
+
+            if (!response.ok) {
+                console.error('❌ Error en respuesta:', response.statusText);
+                throw new Error(`Error ${response.status}: ${response.statusText}`);
+            }
+
             const data = await response.json();
+            console.log('✅ Usuarios cargados:', data.length);
+
             setUsuarios(data);
             setUsuariosFiltrados(data);
             setError(null);
         } catch (error) {
-            console.error('Error:', error);
-            setError('No se pudieron cargar los usuarios');
+            console.error('❌ Error al cargar usuarios:', error);
+            setError(`No se pudieron cargar los usuarios: ${error.message}`);
         } finally {
             setLoading(false);
         }
@@ -101,7 +116,7 @@ export function Usuarios() {
     const abrirModalEditar = (usuario) => {
         setUsuarioEditar({
             ...usuario,
-            contrasena: '' // No mostramos la contraseña encriptada
+            contrasena: ''
         });
         setModalAbierto(true);
     };
@@ -133,7 +148,6 @@ export function Usuarios() {
                 estado: usuarioEditar.estado
             };
 
-            // Solo incluir contraseña si fue modificada
             if (usuarioEditar.contrasena && usuarioEditar.contrasena.trim() !== '') {
                 usuarioActualizado.contrasena = usuarioEditar.contrasena;
             }
@@ -219,7 +233,13 @@ export function Usuarios() {
                             <p className="mt-3">Cargando usuarios...</p>
                         </div>
                     ) : error ? (
-                        <div className="alert alert-danger">{error}</div>
+                        <div className="alert alert-danger">
+                            <i className="bi bi-exclamation-triangle me-2"></i>
+                            {error}
+                            <button className="btn btn-sm btn-primary ms-2" onClick={cargarUsuarios}>
+                                Reintentar
+                            </button>
+                        </div>
                     ) : usuariosFiltrados.length === 0 ? (
                         <div className="empty-state">
                             <i className="bi bi-people empty-icon"></i>
@@ -293,7 +313,7 @@ export function Usuarios() {
                 </main>
             </div>
 
-            {modalAbierto && (
+            {modalAbierto && usuarioEditar && (
                 <div className="modal-overlay" onClick={cerrarModal}>
                     <div className="modal-content" onClick={(e) => e.stopPropagation()}>
                         <div className="modal-header">

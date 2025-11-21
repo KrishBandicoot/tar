@@ -107,19 +107,34 @@ export function Envios() {
         try {
             setLoading(true);
             const token = localStorage.getItem('accessToken');
+            
+            console.log('🔄 Cargando envíos...');
+            console.log('📍 URL:', `${API_BASE_URL}/envios`);
+            console.log('🔐 Token disponible:', !!token);
+
             const response = await fetch(`${API_BASE_URL}/envios`, {
                 headers: {
-                    'Authorization': `Bearer ${token}`
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
                 }
             });
-            if (!response.ok) throw new Error('Error al cargar envíos');
+
+            console.log('📊 Response status:', response.status);
+
+            if (!response.ok) {
+                console.error('❌ Error en respuesta:', response.statusText);
+                throw new Error(`Error ${response.status}: ${response.statusText}`);
+            }
+
             const data = await response.json();
+            console.log('✅ Envíos cargados:', data.length);
+
             setEnvios(data);
             setEnviosFiltrados(data);
             setError(null);
         } catch (error) {
-            console.error('Error:', error);
-            setError('No se pudieron cargar los envíos');
+            console.error('❌ Error al cargar envíos:', error);
+            setError(`No se pudieron cargar los envíos: ${error.message}`);
         } finally {
             setLoading(false);
         }
@@ -269,7 +284,13 @@ export function Envios() {
                             <p className="mt-3">Cargando direcciones de envío...</p>
                         </div>
                     ) : error ? (
-                        <div className="alert alert-danger">{error}</div>
+                        <div className="alert alert-danger">
+                            <i className="bi bi-exclamation-triangle me-2"></i>
+                            {error}
+                            <button className="btn btn-sm btn-primary ms-2" onClick={cargarEnvios}>
+                                Reintentar
+                            </button>
+                        </div>
                     ) : enviosFiltrados.length === 0 ? (
                         <div className="empty-state">
                             <i className="bi bi-truck empty-icon"></i>
@@ -380,7 +401,7 @@ export function Envios() {
                             <div className="modal-body">
                                 <div className="alert alert-info">
                                     <i className="bi bi-info-circle me-2"></i>
-                                    Usuario asociado: <strong>{envioEditar.usuario?.nombre}</strong> ({envioEditar.usuario?.email})
+                                    Usuario asociado: <strong>{envioEditar?.usuario?.nombre}</strong> ({envioEditar?.usuario?.email})
                                 </div>
 
                                 <div className="form-row">
@@ -393,7 +414,7 @@ export function Envios() {
                                             type="text"
                                             id="calle"
                                             name="calle"
-                                            value={envioEditar.calle}
+                                            value={envioEditar?.calle || ''}
                                             onChange={handleCambioEnvio}
                                             required
                                             maxLength={200}
@@ -410,7 +431,7 @@ export function Envios() {
                                             type="text"
                                             id="departamento"
                                             name="departamento"
-                                            value={envioEditar.departamento}
+                                            value={envioEditar?.departamento || ''}
                                             onChange={handleCambioEnvio}
                                             maxLength={50}
                                             placeholder="Ej: 603"
@@ -427,7 +448,7 @@ export function Envios() {
                                         <select
                                             id="region"
                                             name="region"
-                                            value={envioEditar.region}
+                                            value={envioEditar?.region || ''}
                                             onChange={handleCambioEnvio}
                                             required
                                         >
@@ -447,7 +468,7 @@ export function Envios() {
                                         <select
                                             id="comuna"
                                             name="comuna"
-                                            value={envioEditar.comuna}
+                                            value={envioEditar?.comuna || ''}
                                             onChange={handleCambioEnvio}
                                             required
                                             disabled={comunasDisponibles.length === 0}
@@ -470,14 +491,14 @@ export function Envios() {
                                     <textarea
                                         id="indicaciones"
                                         name="indicaciones"
-                                        value={envioEditar.indicaciones}
+                                        value={envioEditar?.indicaciones || ''}
                                         onChange={handleCambioEnvio}
                                         rows="3"
                                         maxLength={500}
                                         placeholder="Ej: Entre calles, color del edificio, no tiene timbre..."
                                     />
                                     <small className="char-count">
-                                        {envioEditar.indicaciones?.length || 0}/500 caracteres
+                                        {(envioEditar?.indicaciones || '').length}/500 caracteres
                                     </small>
                                 </div>
                             </div>
