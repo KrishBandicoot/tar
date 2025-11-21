@@ -213,333 +213,38 @@ export function CheckoutModal({ isOpen, onClose, total, items, preciosDesglose }
     return errores;
   };
 
-  // GENERAR HTML DE LA BOLETA
-  const generarHTMLBoleta = (datosCliente, datosEnvio) => {
-    const fechaActual = new Date().toLocaleString('es-CL', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit'
-    });
-
-    const numeroBoleta = `BOL-${Date.now()}`;
-
-    return `
-      <!DOCTYPE html>
-      <html lang="es">
-      <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Boleta de Compra - Kkarhua</title>
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-        <style>
-          * { margin: 0; padding: 0; box-sizing: border-box; }
-          body { 
-            font-family: Arial, sans-serif; 
-            background: #f5f5f5;
-            padding: 40px 20px;
-          }
-          .boleta-container { min-height: 100vh; }
-          .boleta {
-            max-width: 800px;
-            margin: 0 auto;
-            background: white;
-            padding: 40px;
-            border: 2px solid #333;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
-          }
-          .boleta-header {
-            text-align: center;
-            border-bottom: 3px solid #333;
-            padding-bottom: 20px;
-            margin-bottom: 30px;
-          }
-          .boleta-header h1 {
-            font-size: 32px;
-            margin-bottom: 5px;
-            color: #333;
-            font-weight: bold;
-          }
-          .boleta-header p {
-            color: #666;
-            font-size: 14px;
-            margin: 5px 0;
-          }
-          .boleta-header p strong {
-            color: #333;
-            font-size: 16px;
-          }
-          .boleta-section {
-            margin-bottom: 25px;
-          }
-          .boleta-section h2 {
-            font-size: 16px;
-            color: #333;
-            border-bottom: 2px solid #ddd;
-            padding-bottom: 8px;
-            margin-bottom: 12px;
-            font-weight: 600;
-          }
-          .info-row {
-            display: flex;
-            padding: 6px 0;
-          }
-          .info-label {
-            font-weight: bold;
-            width: 150px;
-            color: #555;
-            flex-shrink: 0;
-          }
-          .info-value {
-            color: #333;
-            flex: 1;
-          }
-          .boleta-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 20px 0;
-          }
-          .boleta-table th {
-            background: #333;
-            color: white;
-            padding: 12px;
-            text-align: left;
-            font-size: 13px;
-            font-weight: 600;
-          }
-          .boleta-table td {
-            padding: 10px 12px;
-            border-bottom: 1px solid #ddd;
-            font-size: 13px;
-            color: #333;
-          }
-          .boleta-table tbody tr:hover {
-            background: #f9f9f9;
-          }
-          .text-right {
-            text-align: right !important;
-          }
-          .boleta-totales {
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 2px solid #333;
-          }
-          .total-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 8px 0;
-            font-size: 15px;
-            color: #333;
-          }
-          .total-row.final {
-            font-size: 20px;
-            font-weight: bold;
-            color: #198754;
-            margin-top: 10px;
-            padding-top: 15px;
-            border-top: 2px solid #333;
-          }
-          .boleta-footer {
-            margin-top: 40px;
-            padding-top: 20px;
-            border-top: 2px solid #ddd;
-            text-align: center;
-          }
-          .boleta-footer p {
-            color: #666;
-            font-size: 12px;
-            margin: 5px 0;
-          }
-          .boleta-footer p:first-child {
-            color: #198754;
-            font-weight: bold;
-            font-size: 14px;
-          }
-          .boleta-actions {
-            max-width: 800px;
-            margin: 20px auto;
-            display: flex;
-            gap: 15px;
-            justify-content: center;
-          }
-          .btn-print, .btn-close {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 8px;
-            font-size: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.3s;
-          }
-          .btn-print {
-            background: #198754;
-            color: white;
-          }
-          .btn-print:hover {
-            background: #157347;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(25, 135, 84, 0.3);
-          }
-          .btn-close {
-            background: #6c757d;
-            color: white;
-          }
-          .btn-close:hover {
-            background: #5a6268;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
-          }
-          @media (max-width: 768px) {
-            body { padding: 20px 10px; }
-            .boleta { padding: 30px 20px; }
-            .boleta-header h1 { font-size: 24px; }
-            .boleta-section h2 { font-size: 14px; }
-            .info-row { flex-direction: column; gap: 3px; }
-            .info-label { width: 100%; font-size: 12px; }
-            .info-value { font-size: 13px; }
-            .boleta-table th, .boleta-table td { padding: 8px 6px; font-size: 11px; }
-            .total-row { font-size: 13px; }
-            .total-row.final { font-size: 16px; }
-            .boleta-actions { flex-direction: column; }
-            .btn-print, .btn-close { width: 100%; justify-content: center; }
-          }
-          @media print {
-            body { background: white; padding: 0; }
-            .boleta { border: 2px solid #333; box-shadow: none; border-radius: 0; max-width: 100%; margin: 0; }
-            .boleta-actions { display: none !important; }
-            .boleta-table th { background: #333 !important; color: white !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-            .total-row.final { color: #198754 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-          }
-        </style>
-      </head>
-      <body>
-        <div class="boleta-container">
-          <div class="boleta">
-            <div class="boleta-header">
-              <h1>🛍️ KKARHUA</h1>
-              <p>Boleta de Compra Electrónica</p>
-              <p><strong>N°: ${numeroBoleta}</strong></p>
-              <p>Fecha: ${fechaActual}</p>
-            </div>
-
-            <div class="boleta-section">
-              <h2>📋 Información del Cliente</h2>
-              <div class="info-row">
-                <span class="info-label">Nombre:</span>
-                <span class="info-value">${datosCliente.nombre} ${datosCliente.apellidos}</span>
-              </div>
-              <div class="info-row">
-                <span class="info-label">Correo:</span>
-                <span class="info-value">${datosCliente.correo}</span>
-              </div>
-            </div>
-
-            <div class="boleta-section">
-              <h2>📦 Dirección de Envío</h2>
-              <div class="info-row">
-                <span class="info-label">Calle:</span>
-                <span class="info-value">${datosEnvio.calle}</span>
-              </div>
-              ${datosEnvio.departamento ? `
-              <div class="info-row">
-                <span class="info-label">Departamento:</span>
-                <span class="info-value">${datosEnvio.departamento}</span>
-              </div>
-              ` : ''}
-              <div class="info-row">
-                <span class="info-label">Comuna:</span>
-                <span class="info-value">${datosEnvio.comuna}</span>
-              </div>
-              <div class="info-row">
-                <span class="info-label">Región:</span>
-                <span class="info-value">${datosEnvio.region}</span>
-              </div>
-              ${datosEnvio.indicaciones ? `
-              <div class="info-row">
-                <span class="info-label">Indicaciones:</span>
-                <span class="info-value">${datosEnvio.indicaciones}</span>
-              </div>
-              ` : ''}
-            </div>
-
-            <div class="boleta-section">
-              <h2>🛒 Detalle de la Compra</h2>
-              <table class="boleta-table">
-                <thead>
-                  <tr>
-                    <th>Producto</th>
-                    <th class="text-right">Cantidad</th>
-                    <th class="text-right">Precio Unit.</th>
-                    <th class="text-right">Subtotal</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  ${items.map(item => `
-                    <tr>
-                      <td>${item.nombre}</td>
-                      <td class="text-right">${item.cantidad}</td>
-                      <td class="text-right">${item.precio.toLocaleString('es-CL')}</td>
-                      <td class="text-right">${(item.precio * item.cantidad).toLocaleString('es-CL')}</td>
-                    </tr>
-                  `).join('')}
-                </tbody>
-              </table>
-            </div>
-
-            <div class="boleta-totales">
-              <div class="total-row">
-                <span>Subtotal (sin IVA):</span>
-                <span><strong>${preciosDesglose.subtotal.toLocaleString('es-CL')}</strong></span>
-              </div>
-              <div class="total-row">
-                <span>IVA (19%):</span>
-                <span><strong>${preciosDesglose.iva.toLocaleString('es-CL')}</strong></span>
-              </div>
-              <div class="total-row final">
-                <span>TOTAL A PAGAR:</span>
-                <span>${preciosDesglose.total.toLocaleString('es-CL')}</span>
-              </div>
-            </div>
-
-            <div class="boleta-footer">
-              <p>✅ Compra realizada exitosamente</p>
-              <p>Gracias por tu preferencia - Kkarhua</p>
-              <p>www.kkarhua.cl | contacto@kkarhua.cl</p>
-            </div>
-          </div>
-
-          <div class="boleta-actions">
-            <button class="btn-print" onclick="window.print()">
-              <i class="bi bi-printer"></i>
-              Imprimir Boleta
-            </button>
-            <button class="btn-close" onclick="window.close()">
-              <i class="bi bi-x-lg"></i>
-              Cerrar
-            </button>
-          </div>
-        </div>
-      </body>
-      </html>
-    `;
-  };
-
-  // ABRIR BOLETA EN NUEVA VENTANA
+  // ABRIR BOLETA EN NUEVA VENTANA CON DATOS
   const abrirBoleta = (datosCliente, datosEnvio) => {
-    const htmlBoleta = generarHTMLBoleta(datosCliente, datosEnvio);
-    const ventanaBoleta = window.open('', '_blank', 'width=900,height=700');
-    
-    if (ventanaBoleta) {
-      ventanaBoleta.document.write(htmlBoleta);
-      ventanaBoleta.document.close();
-    } else {
-      alert('⚠️ Por favor, permite las ventanas emergentes para ver tu boleta');
+    // Crear objeto con todos los datos necesarios para la boleta
+    const datosBoleta = {
+      datosCliente,
+      datosEnvio,
+      items,
+      preciosDesglose
+    };
+
+    console.log('💾 Guardando datos de boleta:', datosBoleta);
+
+    // Guardar temporalmente en localStorage (más confiable que sessionStorage para ventanas nuevas)
+    try {
+      localStorage.setItem('datosBoleta', JSON.stringify(datosBoleta));
+      console.log('✅ Datos guardados correctamente');
+
+      // Usar requestAnimationFrame + setTimeout para asegurar que se completó la escritura
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          // Abrir nueva ventana con ruta a componente Boleta
+          const ventanaBoleta = window.open('/boleta', '_blank', 'width=900,height=700');
+          
+          if (!ventanaBoleta) {
+            alert('⚠️ Por favor, permite las ventanas emergentes para ver tu boleta');
+          }
+        }, 200);
+      });
+
+    } catch (error) {
+      console.error('❌ Error al guardar datos:', error);
+      alert('Error al generar la boleta. Por favor intenta nuevamente.');
     }
   };
 
