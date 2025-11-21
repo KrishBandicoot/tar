@@ -16,6 +16,7 @@ export function Admin() {
     productosActivos: 0,
     totalUsuarios: 0,
     usuariosActivos: 0,
+    totalEnvios: 0,
     loading: true,
     error: null
   });
@@ -54,7 +55,16 @@ export function Admin() {
       label: 'Crear Usuario',
       path: '/crear-usuario'
     },
-    { icon: 'bi-tag', label: 'Categorías', path: '/categorias' },
+    { 
+      icon: 'bi-tag', 
+      label: 'Categorías', 
+      path: '/categorias' 
+    },
+    {
+      icon: 'bi-truck',
+      label: 'Envíos',
+      path: '/envios'
+    },
     {
       icon: 'bi-shop',
       label: 'Ver Tienda',
@@ -75,10 +85,10 @@ export function Admin() {
       path: '/admin'
     },
     {
-      icon: 'bi-cart3',
-      title: 'Órdenes',
-      desc: 'Gestionar todas las órdenes de compra',
-      path: '/ordenes'
+      icon: 'bi-truck',
+      title: 'Envíos',
+      desc: 'Gestionar direcciones de envío registradas',
+      path: '/envios'
     },
     {
       icon: 'bi-box-seam',
@@ -139,12 +149,18 @@ export function Admin() {
         headers: token ? { 'Authorization': `Bearer ${token}` } : {}
       });
 
-      if (!productosResponse.ok || !usuariosResponse.ok) {
+      // Cargar envíos
+      const enviosResponse = await fetch(`${API_BASE_URL}/envios`, {
+        headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+      });
+
+      if (!productosResponse.ok || !usuariosResponse.ok || !enviosResponse.ok) {
         throw new Error('Error al cargar estadísticas');
       }
 
       const productos = await productosResponse.json();
       const usuarios = await usuariosResponse.json();
+      const envios = await enviosResponse.json();
 
       const productosActivos = productos.filter(p => p.estado === 'activo').length;
       const usuariosActivos = usuarios.filter(u => u.estado === 'activo').length;
@@ -154,6 +170,7 @@ export function Admin() {
         productosActivos: productosActivos,
         totalUsuarios: usuarios.length,
         usuariosActivos: usuariosActivos,
+        totalEnvios: envios.length,
         loading: false,
         error: null
       });
@@ -184,11 +201,11 @@ export function Admin() {
       icon: 'bi-people'
     },
     {
-      title: 'Órdenes',
-      value: '0',
-      subtitle: 'Pendientes de procesar',
+      title: 'Direcciones de Envío',
+      value: stats.totalEnvios.toString(),
+      subtitle: 'Registradas en el sistema',
       color: '#0d6efd',
-      icon: 'bi-cart-check'
+      icon: 'bi-truck'
     }
   ];
 

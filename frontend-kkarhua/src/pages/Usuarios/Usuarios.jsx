@@ -26,6 +26,7 @@ export function Usuarios() {
         { icon: 'bi-people', label: 'Usuarios', path: '/usuarios' },
         { icon: 'bi-person-plus', label: 'Crear Usuario', path: '/crear-usuario' },
         { icon: 'bi-tag', label: 'Categorías', path: '/categorias' },
+        { icon: 'bi-truck', label: 'Envíos', path: '/envios'},
         { icon: 'bi-shop', label: 'Ver Tienda', path: '/lista-productos' },
         { icon: 'bi-house', label: 'Inicio', path: '/' }
     ];

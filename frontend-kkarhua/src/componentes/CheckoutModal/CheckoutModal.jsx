@@ -101,6 +101,7 @@ export function CheckoutModal({ isOpen, onClose, total, items }) {
 
   const cargarEnvios = async (userId) => {
     try {
+      console.log('📍 Cargando envíos del usuario:', userId);
       const token = localStorage.getItem('accessToken');
       const response = await fetch(`${API_BASE_URL}/envios/usuario/${userId}`, {
         headers: {
@@ -110,6 +111,7 @@ export function CheckoutModal({ isOpen, onClose, total, items }) {
 
       if (response.ok) {
         const data = await response.json();
+        console.log('✅ Envíos cargados:', data);
         setEnvios(data);
         if (data.length > 0) {
           setSelectedEnvio(data[0].id);
@@ -117,9 +119,12 @@ export function CheckoutModal({ isOpen, onClose, total, items }) {
         } else {
           setShowNewAddressForm(true);
         }
+      } else {
+        console.warn('⚠️ No se pudieron cargar los envíos');
+        setShowNewAddressForm(true);
       }
     } catch (error) {
-      console.error('Error al cargar envíos:', error);
+      console.error('❌ Error al cargar envíos:', error);
       setShowNewAddressForm(true);
     }
   };
@@ -201,11 +206,11 @@ export function CheckoutModal({ isOpen, onClose, total, items }) {
 
     try {
       const token = localStorage.getItem('accessToken');
-
       let envioId = selectedEnvio;
 
+      // PASO 1: Si es una nueva dirección, crearla primero
       if (showNewAddressForm) {
-        console.log('📍 Creando nueva dirección...');
+        console.log('📍 Creando nueva dirección de envío...');
         
         const envioData = {
           calle: formData.calle.trim(),
@@ -216,7 +221,7 @@ export function CheckoutModal({ isOpen, onClose, total, items }) {
           usuarioId: user?.id
         };
 
-        console.log('📦 Datos del envío:', envioData);
+        console.log('📦 Datos del envío a crear:', envioData);
 
         const responseEnvio = await fetch(`${API_BASE_URL}/envios`, {
           method: 'POST',
@@ -234,10 +239,13 @@ export function CheckoutModal({ isOpen, onClose, total, items }) {
         }
 
         const envioCreado = await responseEnvio.json();
-        console.log('✅ Envío creado:', envioCreado);
+        console.log('✅ Dirección de envío creada:', envioCreado);
         envioId = envioCreado.id;
+      } else {
+        console.log('📍 Usando dirección existente con ID:', envioId);
       }
 
+      // PASO 2: Procesar el pedido con el envioId
       const ordersData = {
         cliente: {
           nombre: formData.nombre.trim(),
@@ -249,10 +257,18 @@ export function CheckoutModal({ isOpen, onClose, total, items }) {
         total: total
       };
 
-      console.log('📋 Orden final:', ordersData);
+      console.log('📋 Datos de la orden:', ordersData);
 
-      alert(`✅ Pedido procesado correctamente\n\nTotal: $${total.toLocaleString('es-CL')}\nEnvío guardado: ${envioId}`);
+      // Aquí puedes agregar el endpoint para crear la orden si existe
+      // const responseOrden = await fetch(`${API_BASE_URL}/ordenes`, { ... });
+
+      alert(`✅ Pedido procesado correctamente\n\n` +
+            `Total: $${total.toLocaleString('es-CL')}\n` +
+            `Dirección de envío guardada con ID: ${envioId}\n\n` +
+            `Cliente: ${formData.nombre} ${formData.apellidos}\n` +
+            `Email: ${formData.correo}`);
       
+      // Limpiar formulario y cerrar modal
       setStep(1);
       setFormData({
         nombre: '',
@@ -269,7 +285,7 @@ export function CheckoutModal({ isOpen, onClose, total, items }) {
     } catch (error) {
       console.error('❌ Error al procesar pago:', error);
       setErrors({ general: error.message });
-      alert('❌ ' + error.message);
+      alert('❌ Error: ' + error.message);
     } finally {
       setLoading(false);
     }
@@ -357,8 +373,8 @@ export function CheckoutModal({ isOpen, onClose, total, items }) {
         {step === 2 && (
           <>
             <div className="checkout-header">
-              <h2>Dirección de entrega de los productos</h2>
-              <p className="checkout-subtitle">Ingrese dirección de forma detallada</p>
+              <h2>Dirección de entrega</h2>
+              <p className="checkout-subtitle">Selecciona o ingresa una dirección</p>
             </div>
 
             <form className="checkout-form">
