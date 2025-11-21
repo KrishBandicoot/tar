@@ -15,6 +15,19 @@ export function Carrito() {
   const { items, eliminarDelCarrito, actualizarCantidad, vaciarCarrito, obtenerTotal } = useCarrito();
   const [checkoutOpen, setCheckoutOpen] = useState(false);
 
+  // Cálculos con IVA
+  const IVA_PORCENTAJE = 0.19; // 19%
+  const subtotal = obtenerTotal();
+  const iva = Math.round(subtotal * IVA_PORCENTAJE);
+  const total = subtotal + iva;
+
+  // Calcular desglose de precios para el CheckoutModal
+  const preciosDesglose = {
+    subtotal: subtotal,
+    iva: iva,
+    total: total
+  };
+
   const getImageUrl = (imagen) => {
     if (!imagen) return 'https://via.placeholder.com/80x80?text=Sin+Imagen';
     if (imagen.startsWith('http')) return imagen;
@@ -187,20 +200,25 @@ export function Carrito() {
               </div>
             </div>
 
-            {/* Resumen del pedido */}
+            {/* Resumen del pedido con IVA */}
             <div className="col-lg-4">
               <div className="card resumen-card">
                 <div className="card-body">
-                  <h4 className="card-title mb-4">TOTAL</h4>
+                  <h4 className="card-title mb-4">Resumen del Pedido</h4>
                   
                   <div className="resumen-item">
                     <span>Subtotal:</span>
-                    <span>${obtenerTotal().toLocaleString('es-CL')}</span>
+                    <span>${subtotal.toLocaleString('es-CL')}</span>
+                  </div>
+
+                  <div className="resumen-item">
+                    <span>IVA (19%):</span>
+                    <span>${iva.toLocaleString('es-CL')}</span>
                   </div>
 
                   <div className="resumen-total">
                     <span>Total:</span>
-                    <span>${obtenerTotal().toLocaleString('es-CL')}</span>
+                    <span>${total.toLocaleString('es-CL')}</span>
                   </div>
 
                   <button 
@@ -220,6 +238,10 @@ export function Carrito() {
                       <i className="bi bi-shield-check me-2"></i>
                       Compra 100% segura
                     </p>
+                    <p className="text-muted small mb-0 mt-2">
+                      <i className="bi bi-receipt me-2"></i>
+                      Precio incluye IVA
+                    </p>
                   </div>
                 </div>
               </div>
@@ -228,12 +250,13 @@ export function Carrito() {
         </div>
       </div>
 
-      {/* Checkout Modal */}
+      {/* Checkout Modal - pasamos el total con IVA incluido */}
       <CheckoutModal 
         isOpen={checkoutOpen}
         onClose={() => setCheckoutOpen(false)}
-        total={obtenerTotal()}
+        total={total}
         items={items}
+        preciosDesglose={preciosDesglose}
       />
 
       <Footer />
