@@ -11,164 +11,363 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.example.kkarhua.fullrest.entities.Producto;
-import com.example.kkarhua.fullrest.repositories.ProductoRepository;
-import com.example.kkarhua.fullrest.services.ProductoServiceImpl;
+import com.example.kkarhua.fullrest.entities.Usuario;
+import com.example.kkarhua.fullrest.repositories.UsuarioRepository;
+import com.example.kkarhua.fullrest.services.UsuarioServiceImpl;
 
 @ExtendWith(MockitoExtension.class)
-class ProductoServiceImplTest {
+@DisplayName("Tests para UsuarioServiceImpl")
+class UsuarioServiceImplTest {
 
     @Mock
-    private ProductoRepository productoRepository;
+    private UsuarioRepository usuarioRepository;
 
     @InjectMocks
-    private ProductoServiceImpl productoService;
+    private UsuarioServiceImpl usuarioService;
 
-    private Producto producto1;
-    private Producto producto2;
+    private Usuario usuario1;
+    private Usuario usuario2;
+    private Usuario usuario3;
 
     @BeforeEach
     void setUp() {
-        producto1 = new Producto();
-        producto1.setId(1L);
-        producto1.setNombre("Laptop HP Pavilion");
-        producto1.setDescripcion("Laptop con procesador Intel Core i5");
-        producto1.setPrecio(649990);
-        producto1.setStock(15);
-        producto1.setCategoria("Electrónica");
-        producto1.setImagen("laptop-hp.jpg");
-        producto1.setEstado("activo");
-        producto1.setFechaCreacion(LocalDateTime.now());
+        usuario1 = new Usuario();
+        usuario1.setId(1L);
+        usuario1.setNombre("Administrador Principal");
+        usuario1.setEmail("admin@kkarhua.com");
+        usuario1.setContrasena("Admin123");
+        usuario1.setRol("super-admin");
+        usuario1.setEstado("activo");
+        usuario1.setFechaCreacion(LocalDateTime.now());
 
-        producto2 = new Producto();
-        producto2.setId(2L);
-        producto2.setNombre("Mouse Logitech");
-        producto2.setDescripcion("Mouse inalámbrico ergonómico");
-        producto2.setPrecio(89990);
-        producto2.setStock(30);
-        producto2.setCategoria("Electrónica");
-        producto2.setImagen("mouse-logitech.jpg");
-        producto2.setEstado("activo");
-        producto2.setFechaCreacion(LocalDateTime.now());
+        usuario2 = new Usuario();
+        usuario2.setId(2L);
+        usuario2.setNombre("Juan Pérez");
+        usuario2.setEmail("juan.perez@email.com");
+        usuario2.setContrasena("Juan123");
+        usuario2.setRol("cliente");
+        usuario2.setEstado("activo");
+        usuario2.setFechaCreacion(LocalDateTime.now());
+
+        usuario3 = new Usuario();
+        usuario3.setId(3L);
+        usuario3.setNombre("María González");
+        usuario3.setEmail("maria@email.com");
+        usuario3.setContrasena("Maria123");
+        usuario3.setRol("vendedor");
+        usuario3.setEstado("activo");
+        usuario3.setFechaCreacion(LocalDateTime.now());
     }
 
     @Test
-    void testFindByAll_DebeRetornarListaDeProductos() {
+    @DisplayName("findByAll - Debe retornar lista de todos los usuarios")
+    void testFindByAll_DebeRetornarListaDeUsuarios() {
         // Given
-        List<Producto> productos = Arrays.asList(producto1, producto2);
-        when(productoRepository.findAll()).thenReturn(productos);
+        List<Usuario> usuarios = Arrays.asList(usuario1, usuario2, usuario3);
+        when(usuarioRepository.findAll()).thenReturn(usuarios);
 
         // When
-        List<Producto> resultado = productoService.findByAll();
+        List<Usuario> resultado = usuarioService.findByAll();
 
         // Then
         assertNotNull(resultado);
-        assertEquals(2, resultado.size());
-        assertEquals("Laptop HP Pavilion", resultado.get(0).getNombre());
-        assertEquals("Mouse Logitech", resultado.get(1).getNombre());
-        verify(productoRepository, times(1)).findAll();
+        assertEquals(3, resultado.size());
+        assertEquals("Administrador Principal", resultado.get(0).getNombre());
+        assertEquals("Juan Pérez", resultado.get(1).getNombre());
+        assertEquals("María González", resultado.get(2).getNombre());
+        verify(usuarioRepository, times(1)).findAll();
     }
 
     @Test
-    void testFindById_DebeRetornarProductoCuandoExiste() {
+    @DisplayName("findByAll - Debe retornar lista vacía cuando no hay usuarios")
+    void testFindByAll_DebeRetornarListaVaciaCuandoNoHayUsuarios() {
         // Given
-        when(productoRepository.findById(1L)).thenReturn(Optional.of(producto1));
+        when(usuarioRepository.findAll()).thenReturn(Arrays.asList());
 
         // When
-        Optional<Producto> resultado = productoService.findById(1L);
+        List<Usuario> resultado = usuarioService.findByAll();
+
+        // Then
+        assertNotNull(resultado);
+        assertTrue(resultado.isEmpty());
+        verify(usuarioRepository, times(1)).findAll();
+    }
+
+    @Test
+    @DisplayName("findById - Debe retornar usuario cuando existe")
+    void testFindById_DebeRetornarUsuarioCuandoExiste() {
+        // Given
+        when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario1));
+
+        // When
+        Optional<Usuario> resultado = usuarioService.findById(1L);
 
         // Then
         assertTrue(resultado.isPresent());
-        assertEquals("Laptop HP Pavilion", resultado.get().getNombre());
-        assertEquals(649990, resultado.get().getPrecio());
-        verify(productoRepository, times(1)).findById(1L);
+        assertEquals("Administrador Principal", resultado.get().getNombre());
+        assertEquals("super-admin", resultado.get().getRol());
+        assertEquals("admin@kkarhua.com", resultado.get().getEmail());
+        verify(usuarioRepository, times(1)).findById(1L);
     }
 
     @Test
+    @DisplayName("findById - Debe retornar Optional vacío cuando no existe")
     void testFindById_DebeRetornarVacioCuandoNoExiste() {
         // Given
-        when(productoRepository.findById(99L)).thenReturn(Optional.empty());
+        when(usuarioRepository.findById(99L)).thenReturn(Optional.empty());
 
         // When
-        Optional<Producto> resultado = productoService.findById(99L);
+        Optional<Usuario> resultado = usuarioService.findById(99L);
 
         // Then
         assertFalse(resultado.isPresent());
-        verify(productoRepository, times(1)).findById(99L);
+        verify(usuarioRepository, times(1)).findById(99L);
     }
 
     @Test
-    void testSave_DebeGuardarProductoCorrectamente() {
+    @DisplayName("findByEmail - Debe retornar usuario cuando email existe")
+    void testFindByEmail_DebeRetornarUsuarioCuandoExiste() {
         // Given
-        Producto nuevoProducto = new Producto();
-        nuevoProducto.setNombre("Teclado Mecánico");
-        nuevoProducto.setDescripcion("Teclado gaming RGB");
-        nuevoProducto.setPrecio(129990);
-        nuevoProducto.setStock(20);
-        nuevoProducto.setCategoria("Electrónica");
-        
-        when(productoRepository.save(any(Producto.class))).thenReturn(nuevoProducto);
+        when(usuarioRepository.findByEmail("admin@kkarhua.com")).thenReturn(Optional.of(usuario1));
 
         // When
-        Producto resultado = productoService.save(nuevoProducto);
-
-        // Then
-        assertNotNull(resultado);
-        assertEquals("Teclado Mecánico", resultado.getNombre());
-        assertEquals(129990, resultado.getPrecio());
-        verify(productoRepository, times(1)).save(nuevoProducto);
-    }
-
-    @Test
-    void testDelete_DebeEliminarProductoCuandoExiste() {
-        // Given
-        when(productoRepository.findById(1L)).thenReturn(Optional.of(producto1));
-        doNothing().when(productoRepository).delete(producto1);
-
-        // When
-        Optional<Producto> resultado = productoService.delete(producto1);
+        Optional<Usuario> resultado = usuarioService.findByEmail("admin@kkarhua.com");
 
         // Then
         assertTrue(resultado.isPresent());
-        assertEquals("Laptop HP Pavilion", resultado.get().getNombre());
-        verify(productoRepository, times(1)).findById(1L);
-        verify(productoRepository, times(1)).delete(producto1);
+        assertEquals("Administrador Principal", resultado.get().getNombre());
+        assertEquals("admin@kkarhua.com", resultado.get().getEmail());
+        verify(usuarioRepository, times(1)).findByEmail("admin@kkarhua.com");
     }
 
     @Test
-    void testDelete_NoDebeEliminarCuandoNoExiste() {
+    @DisplayName("findByEmail - Debe retornar Optional vacío cuando email no existe")
+    void testFindByEmail_DebeRetornarVacioCuandoNoExiste() {
         // Given
-        Producto productoInexistente = new Producto();
-        productoInexistente.setId(99L);
-        when(productoRepository.findById(99L)).thenReturn(Optional.empty());
+        when(usuarioRepository.findByEmail("noexiste@email.com")).thenReturn(Optional.empty());
 
         // When
-        Optional<Producto> resultado = productoService.delete(productoInexistente);
+        Optional<Usuario> resultado = usuarioService.findByEmail("noexiste@email.com");
 
         // Then
         assertFalse(resultado.isPresent());
-        verify(productoRepository, times(1)).findById(99L);
-        verify(productoRepository, never()).delete(any());
+        verify(usuarioRepository, times(1)).findByEmail("noexiste@email.com");
     }
 
     @Test
-    void testSave_DebeActualizarStockDeProductoExistente() {
+    @DisplayName("save - Debe encriptar contraseña al guardar nuevo usuario")
+    void testSave_DebeEncriptarContrasenaAlGuardarNuevoUsuario() {
         // Given
-        producto1.setStock(10); // Stock original
-        when(productoRepository.save(producto1)).thenReturn(producto1);
+        Usuario nuevoUsuario = new Usuario();
+        nuevoUsuario.setNombre("Pedro López");
+        nuevoUsuario.setEmail("pedro@email.com");
+        nuevoUsuario.setContrasena("Pedro123");
+        nuevoUsuario.setRol("cliente");
+        nuevoUsuario.setEstado("activo");
+
+        when(usuarioRepository.save(any(Usuario.class))).thenAnswer(invocation -> {
+            Usuario usuario = invocation.getArgument(0);
+            usuario.setId(4L);
+            usuario.setFechaCreacion(LocalDateTime.now());
+            return usuario;
+        });
 
         // When
-        producto1.setStock(5); // Actualizar stock
-        Producto resultado = productoService.save(producto1);
+        Usuario resultado = usuarioService.save(nuevoUsuario);
 
         // Then
         assertNotNull(resultado);
-        assertEquals(5, resultado.getStock());
-        verify(productoRepository, times(1)).save(producto1);
+        assertNotNull(resultado.getId());
+        assertEquals("Pedro López", resultado.getNombre());
+        assertNotEquals("Pedro123", resultado.getContrasena());
+        assertTrue(resultado.getContrasena().startsWith("$2a$"));
+        verify(usuarioRepository, times(1)).save(any(Usuario.class));
+    }
+
+    @Test
+    @DisplayName("save - No debe reencriptar contraseña ya encriptada")
+    void testSave_NoDebeReencriptarContrasenaYaEncriptada() {
+        // Given
+        Usuario usuarioConContrasenaEncriptada = new Usuario();
+        usuarioConContrasenaEncriptada.setId(1L);
+        usuarioConContrasenaEncriptada.setNombre("Usuario Test");
+        usuarioConContrasenaEncriptada.setEmail("test@email.com");
+        String contrasenaEncriptada = "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhkO";
+        usuarioConContrasenaEncriptada.setContrasena(contrasenaEncriptada);
+        usuarioConContrasenaEncriptada.setRol("cliente");
+        usuarioConContrasenaEncriptada.setEstado("activo");
+
+        when(usuarioRepository.save(any(Usuario.class))).thenReturn(usuarioConContrasenaEncriptada);
+
+        // When
+        Usuario resultado = usuarioService.save(usuarioConContrasenaEncriptada);
+
+        // Then
+        assertNotNull(resultado);
+        assertEquals(contrasenaEncriptada, resultado.getContrasena());
+        verify(usuarioRepository, times(1)).save(any(Usuario.class));
+    }
+
+    @Test
+    @DisplayName("save - Debe encriptar nueva contraseña al actualizar usuario existente")
+    void testSave_DebeEncriptarNuevaContrasenaAlActualizar() {
+        // Given
+        Usuario usuarioExistente = new Usuario();
+        usuarioExistente.setId(1L);
+        usuarioExistente.setNombre("Usuario Actualizado");
+        usuarioExistente.setEmail("usuario@email.com");
+        usuarioExistente.setContrasena("NuevaPass123"); // Nueva contraseña sin encriptar
+        usuarioExistente.setRol("cliente");
+        usuarioExistente.setEstado("activo");
+
+        when(usuarioRepository.save(any(Usuario.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        // When
+        Usuario resultado = usuarioService.save(usuarioExistente);
+
+        // Then
+        assertNotNull(resultado);
+        assertNotEquals("NuevaPass123", resultado.getContrasena());
+        assertTrue(resultado.getContrasena().startsWith("$2a$"));
+        verify(usuarioRepository, times(1)).save(any(Usuario.class));
+    }
+
+    @Test
+    @DisplayName("existsByEmail - Debe retornar true cuando email existe")
+    void testExistsByEmail_DebeRetornarTrueCuandoEmailExiste() {
+        // Given
+        when(usuarioRepository.existsByEmail("admin@kkarhua.com")).thenReturn(true);
+
+        // When
+        boolean resultado = usuarioService.existsByEmail("admin@kkarhua.com");
+
+        // Then
+        assertTrue(resultado);
+        verify(usuarioRepository, times(1)).existsByEmail("admin@kkarhua.com");
+    }
+
+    @Test
+    @DisplayName("existsByEmail - Debe retornar false cuando email no existe")
+    void testExistsByEmail_DebeRetornarFalseCuandoEmailNoExiste() {
+        // Given
+        when(usuarioRepository.existsByEmail("noexiste@email.com")).thenReturn(false);
+
+        // When
+        boolean resultado = usuarioService.existsByEmail("noexiste@email.com");
+
+        // Then
+        assertFalse(resultado);
+        verify(usuarioRepository, times(1)).existsByEmail("noexiste@email.com");
+    }
+
+    @Test
+    @DisplayName("delete - Debe eliminar usuario cuando existe")
+    void testDelete_DebeEliminarUsuarioCuandoExiste() {
+        // Given
+        when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario1));
+        doNothing().when(usuarioRepository).delete(usuario1);
+
+        // When
+        Optional<Usuario> resultado = usuarioService.delete(usuario1);
+
+        // Then
+        assertTrue(resultado.isPresent());
+        assertEquals("Administrador Principal", resultado.get().getNombre());
+        verify(usuarioRepository, times(1)).findById(1L);
+        verify(usuarioRepository, times(1)).delete(usuario1);
+    }
+
+    @Test
+    @DisplayName("delete - No debe eliminar cuando usuario no existe")
+    void testDelete_NoDebeEliminarCuandoNoExiste() {
+        // Given
+        Usuario usuarioInexistente = new Usuario();
+        usuarioInexistente.setId(99L);
+        when(usuarioRepository.findById(99L)).thenReturn(Optional.empty());
+
+        // When
+        Optional<Usuario> resultado = usuarioService.delete(usuarioInexistente);
+
+        // Then
+        assertFalse(resultado.isPresent());
+        verify(usuarioRepository, times(1)).findById(99L);
+        verify(usuarioRepository, never()).delete(any());
+    }
+
+    @Test
+    @DisplayName("save - Debe guardar usuario con todos los roles permitidos")
+    void testSave_DebeGuardarUsuarioConDiferentesRoles() {
+        // Given
+        String[] roles = {"cliente", "vendedor", "super-admin"};
+        
+        for (String rol : roles) {
+            Usuario usuario = new Usuario();
+            usuario.setNombre("Usuario " + rol);
+            usuario.setEmail(rol + "@email.com");
+            usuario.setContrasena("Pass123");
+            usuario.setRol(rol);
+            usuario.setEstado("activo");
+
+            when(usuarioRepository.save(any(Usuario.class))).thenAnswer(inv -> inv.getArgument(0));
+
+            // When
+            Usuario resultado = usuarioService.save(usuario);
+
+            // Then
+            assertNotNull(resultado);
+            assertEquals(rol, resultado.getRol());
+        }
+    }
+
+    @Test
+    @DisplayName("save - Debe guardar usuario con diferentes estados")
+    void testSave_DebeGuardarUsuarioConDiferentesEstados() {
+        // Given
+        String[] estados = {"activo", "inactivo"};
+        
+        for (String estado : estados) {
+            Usuario usuario = new Usuario();
+            usuario.setNombre("Usuario");
+            usuario.setEmail("usuario@email.com");
+            usuario.setContrasena("Pass123");
+            usuario.setRol("cliente");
+            usuario.setEstado(estado);
+
+            when(usuarioRepository.save(any(Usuario.class))).thenAnswer(inv -> inv.getArgument(0));
+
+            // When
+            Usuario resultado = usuarioService.save(usuario);
+
+            // Then
+            assertNotNull(resultado);
+            assertEquals(estado, resultado.getEstado());
+        }
+    }
+
+    @Test
+    @DisplayName("findById - Debe verificar que usuario tiene todos los campos necesarios")
+    void testFindById_DebeVerificarTodosLosCampos() {
+        // Given
+        when(usuarioRepository.findById(1L)).thenReturn(Optional.of(usuario1));
+
+        // When
+        Optional<Usuario> resultado = usuarioService.findById(1L);
+
+        // Then
+        assertTrue(resultado.isPresent());
+        Usuario u = resultado.get();
+        assertNotNull(u.getId());
+        assertNotNull(u.getNombre());
+        assertNotNull(u.getEmail());
+        assertNotNull(u.getContrasena());
+        assertNotNull(u.getRol());
+        assertNotNull(u.getEstado());
+        assertNotNull(u.getFechaCreacion());
     }
 }
