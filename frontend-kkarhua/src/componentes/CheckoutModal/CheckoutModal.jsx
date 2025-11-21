@@ -1,6 +1,7 @@
 // src/componentes/CheckoutModal/CheckoutModal.jsx
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { useCarrito } from '../../context/CarritoContext';
 import './CheckoutModal.css';
 
 const API_BASE_URL = 'http://localhost:8080/api';
@@ -52,6 +53,7 @@ const regionesComunas = {
 
 export function CheckoutModal({ isOpen, onClose, total, items, preciosDesglose }) {
   const { user } = useAuth();
+  const { vaciarCarrito } = useCarrito(); // ← AGREGADO
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [envios, setEnvios] = useState([]);
@@ -215,7 +217,6 @@ export function CheckoutModal({ isOpen, onClose, total, items, preciosDesglose }
 
   // ABRIR BOLETA EN NUEVA VENTANA CON DATOS
   const abrirBoleta = (datosCliente, datosEnvio) => {
-    // Crear objeto con todos los datos necesarios para la boleta
     const datosBoleta = {
       datosCliente,
       datosEnvio,
@@ -225,15 +226,12 @@ export function CheckoutModal({ isOpen, onClose, total, items, preciosDesglose }
 
     console.log('💾 Guardando datos de boleta:', datosBoleta);
 
-    // Guardar temporalmente en localStorage (más confiable que sessionStorage para ventanas nuevas)
     try {
       localStorage.setItem('datosBoleta', JSON.stringify(datosBoleta));
       console.log('✅ Datos guardados correctamente');
 
-      // Usar requestAnimationFrame + setTimeout para asegurar que se completó la escritura
       requestAnimationFrame(() => {
         setTimeout(() => {
-          // Abrir nueva ventana con ruta a componente Boleta
           const ventanaBoleta = window.open('/boleta', '_blank', 'width=900,height=700');
           
           if (!ventanaBoleta) {
@@ -340,9 +338,47 @@ export function CheckoutModal({ isOpen, onClose, total, items, preciosDesglose }
       };
 
       abrirBoleta(datosCliente, datosEnvio);
-
       console.log('✅ Boleta generada exitosamente');
+
+      // PASO 4: GUARDAR COMPRA EN LA BASE DE DATOS
+      console.log('💾 Guardando compra en la base de datos...');
+      const compraData = {
+        usuario: { id: user.id },
+        envio: { id: envioId },
+        subtotal: preciosDesglose.subtotal,
+        iva: preciosDesglose.iva,
+        total: preciosDesglose.total,
+        detalleProductos: JSON.stringify(items),
+        estado: 'completada'
+      };
+
+      try {
+        const responseCompra = await fetch(`${API_BASE_URL}/compras`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(compraData)
+        });
+
+        if (!responseCompra.ok) {
+          console.warn('⚠️ Error al guardar compra, pero boleta generada');
+        } else {
+          const compraGuardada = await responseCompra.json();
+          console.log('✅ Compra guardada con ID:', compraGuardada.id);
+        }
+      } catch (error) {
+        console.warn('⚠️ Error al guardar compra:', error);
+        // No interrumpimos el flujo, la boleta ya fue generada
+      }
+
       alert('✅ ¡Compra realizada con éxito!\n\nSe ha generado tu boleta de compra.');
+      
+      // PASO 5: VACIAR EL CARRITO
+      console.log('🧹 Limpiando carrito de compras...');
+      vaciarCarrito();
+      console.log('✅ Carrito vaciado exitosamente');
       
       setStep(1);
       setFormData({

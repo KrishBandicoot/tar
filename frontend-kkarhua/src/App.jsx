@@ -17,6 +17,7 @@ import { CrearUsuario } from './pages/CrearUsuario/CrearUsuario';
 import { Categorias } from './pages/Categorias/Categorias';
 import { Envios } from './pages/Envios/Envios';
 import { Boleta } from './componentes/Boleta/Boleta';
+import { Compras } from './pages/Compras/Compras';
 import './App.css'  
 
 function App() {
@@ -50,6 +51,7 @@ function App() {
               <Route path="/categorias" element={<Categorias />} />
               <Route path="/envios" element={<Envios />} />
               <Route path="/boleta" element={<Boleta />} />
+              <Route path="/compras" element={<Compras />} />
 
            </Routes>
         </Router>

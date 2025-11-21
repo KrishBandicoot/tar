@@ -16,7 +16,7 @@ export function Admin() {
     productosActivos: 0,
     totalUsuarios: 0,
     usuariosActivos: 0,
-    totalEnvios: 0,
+    totalCompras: 0,
     loading: true,
     error: null
   });
@@ -65,6 +65,7 @@ export function Admin() {
       label: 'Envíos',
       path: '/envios'
     },
+    { icon: 'bi-cart-check', label: 'Compras', path: '/compras'},
     {
       icon: 'bi-shop',
       label: 'Ver Tienda',
@@ -78,11 +79,12 @@ export function Admin() {
   ];
 
   const quickMenus = [
+
     {
-      icon: 'bi-speedometer2',
-      title: 'Dashboard',
-      desc: 'Ver estadísticas y datos generales del sistema',
-      path: '/admin'
+      icon: 'bi-cart-check', 
+      title: 'Compras', 
+      desc: 'Revisar todas las compras realizadas',
+      path: '/compras'
     },
     {
       icon: 'bi-truck',
@@ -149,28 +151,29 @@ export function Admin() {
         headers: token ? { 'Authorization': `Bearer ${token}` } : {}
       });
 
-      // Cargar envíos
-      const enviosResponse = await fetch(`${API_BASE_URL}/envios`, {
+      // Cargar compras (REEMPLAZADO: antes era envíos)
+      const comprasResponse = await fetch(`${API_BASE_URL}/compras/stats/totales`, {
         headers: token ? { 'Authorization': `Bearer ${token}` } : {}
       });
 
-      if (!productosResponse.ok || !usuariosResponse.ok || !enviosResponse.ok) {
+      if (!productosResponse.ok || !usuariosResponse.ok || !comprasResponse.ok) {
         throw new Error('Error al cargar estadísticas');
       }
 
       const productos = await productosResponse.json();
       const usuarios = await usuariosResponse.json();
-      const envios = await enviosResponse.json();
+      const comprasStats = await comprasResponse.json();
 
       const productosActivos = productos.filter(p => p.estado === 'activo').length;
       const usuariosActivos = usuarios.filter(u => u.estado === 'activo').length;
+      const totalCompras = comprasStats.totalCompras;
 
       setStats({
         totalProductos: productos.length,
         productosActivos: productosActivos,
         totalUsuarios: usuarios.length,
         usuariosActivos: usuariosActivos,
-        totalEnvios: envios.length,
+        totalCompras: totalCompras,
         loading: false,
         error: null
       });
@@ -184,7 +187,7 @@ export function Admin() {
     }
   };
 
-  // Array de tarjetas de estadísticas dinámicas
+  // Array de tarjetas de estadísticas dinámicas (ACTUALIZADO)
   const statsCards = [
     {
       title: 'Productos',
@@ -201,11 +204,11 @@ export function Admin() {
       icon: 'bi-people'
     },
     {
-      title: 'Direcciones de Envío',
-      value: stats.totalEnvios.toString(),
-      subtitle: 'Registradas en el sistema',
+      title: 'Compras Realizadas',
+      value: stats.totalCompras.toString(),
+      subtitle: 'Total de compras en el sistema',
       color: '#0d6efd',
-      icon: 'bi-truck'
+      icon: 'bi-cart-check'
     }
   ];
 
