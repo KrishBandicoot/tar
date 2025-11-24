@@ -1,6 +1,0 @@
-Para ejecutar el Backend, neceitas abrir MySQL y hacer una base de datos en el puerto 3306, tiene que llamarse basedatos, también tienes que abrir xammp y darle a run en MySQL y apache.
-Luego en Visual Code Studio, tienes que presionar el spingboot dashboard y darle al botón de play.
-
-Ahora para ejecutar el frontend solo tienes que aabrir el frontend con Visual Code Studio y abrir una termnial, en la terminal escribes 
-npm run dev
-y se abrirá el frontend, te aprecerea en la misma terminal el link que tienes que usar para verlo.
