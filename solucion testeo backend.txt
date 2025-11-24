@@ -1,6 +1,0 @@
-cuando haces el testo en el backend es posible que el springboot se pare, y no quiera empezar. en ese caso en la terminar te dira un port que esta siendo usado, usualmente es el 56837 pero puede variar.
-para solucionar lo abre powershell
-e ingresa lo siguiente.
-netstat -ano | findstr :56837(o el numero que salga del port)
-taskkill /PID (numero que apareció en el anterior) /F 
-luego de eso todo volverá a funcionar
